@@ -17,7 +17,7 @@ Dans le tableau de bord, chercher **prometheus_employee_soap_service** dans le m
 
 ## Alerte
 
-`netdata/health.d/employee_service.conf` définit l'alerte **employee_soap_service_injoignable** : elle passe en **CRITICAL** si la collecte des métriques du service échoue pendant 30 secondes (service arrêté ou planté), et revient à **CLEAR** quand il répond de nouveau. Vérifié en arrêtant le conteneur `es-service`.
+`netdata/health.d/employee_service.conf` définit l'alerte **employee_soap_service_injoignable** : elle passe en **CRITICAL** quand les métriques du service n'ont plus été collectées depuis plus de 30 secondes (`$now - $last_collected_t` sur le graphique `process_uptime_seconds` : service arrêté ou planté), et revient à **CLEAR** quand il répond de nouveau. Cette formulation fonctionne avec Netdata 2.x, où le graphique interne `*_data_collection_status` n'existe plus pour les jobs prometheus. Vérifié en arrêtant le service (Netdata 2.11 pour Windows : CRITICAL après ~40 s, CLEAR au redémarrage).
 
 ```bash
 curl -s "http://localhost:19999/api/v1/alarms?all" | grep employee_soap_service_injoignable

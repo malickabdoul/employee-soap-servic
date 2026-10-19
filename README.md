@@ -42,6 +42,8 @@ Détails : [docs/architecture.md](docs/architecture.md).
 
 ## Installation sur une machine neuve
 
+> Sans Docker (Windows sans virtualisation, par exemple) : `./scripts/install-windows.sh` dans Git Bash installe et démarre tout automatiquement. Détails dans [docs/installation-windows.md](docs/installation-windows.md) ; installation testée de bout en bout (23/23).
+
 ```bash
 git clone https://github.com/malickabdoul/employee-soap-servic.git employee-soap-service
 cd employee-soap-service
