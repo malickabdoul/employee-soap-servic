@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="a69d472a-190d-4c94-8f8a-5e13f30bae34" activeEnvironment="Default" name="EmployeeService" resourceRoot="${projectDir}" soapui-version="5.7.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/>
+<con:interface xsi:type="con:WsdlInterface" id="e91399b0-af30-40de-ab78-32ef5bb09266" wsaVersion="NONE" name="EmployeeSoapBinding" type="wsdl" bindingName="{http://ws.employes.ibam.bf/v1}EmployeeSoapBinding" soapVersion="1_1" anonymous="optional" definition="http://localhost:8080/services/EmployeeService?wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/>
+<con:endpoints><con:endpoint>http://localhost:8080/services/EmployeeService</con:endpoint></con:endpoints><con:operation id="c5a75190-2e1e-4f1f-912b-6be99101d72f" isOneWay="false" action="http://ws.employes.ibam.bf/v1/createEmployee" name="createEmployee" bindingOperationName="createEmployee" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/></con:operation><con:operation id="567698fb-ef57-4a4c-a937-9b87a77d98ea" isOneWay="false" action="http://ws.employes.ibam.bf/v1/getEmployeeDetails" name="getEmployeeDetails" bindingOperationName="getEmployeeDetails" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/></con:operation><con:operation id="5a5a066b-3805-4b03-b58b-71b02419e311" isOneWay="false" action="http://ws.employes.ibam.bf/v1/updateEmployee" name="updateEmployee" bindingOperationName="updateEmployee" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/></con:operation></con:interface>
+<con:testSuite id="f8993594-a602-4278-91f3-ec9625631b1e" name="Tests du service EmployeeService"><con:settings/><con:runType>SEQUENTIAL</con:runType>
+<con:testCase id="35497fbf-fd9c-4aa9-a0f9-55794b41d833" failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="1 - Consultation getEmployeeDetails" searchProperties="true"><con:settings/>
+<con:testStep type="request" id="4c39ccda-6fd4-4396-af3c-6e8e8c5482bf" name="Employé existant"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>getEmployeeDetails</con:operation>
+<con:request name="Employé existant" id="53f04be1-153c-45c3-9634-94267e27fb77"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:getEmployeeDetailsRequest>
+         <emp:matricule>EMP-0001</emp:matricule>
+      </emp:getEmployeeDetailsRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="648b7840-1f9e-46f6-a1e4-729226d300cd" name="Réponse SOAP"/><con:assertion type="SOAP Fault Assertion" id="570414a4-1aef-4317-9f11-1d07b6c3bf32" name="Pas de SOAP Fault"/><con:assertion type="Schema Compliance" id="a4215c18-6a2f-44c4-9b19-0d2812aab742" name="Conforme au WSDL"><con:configuration/></con:assertion><con:assertion type="Simple Contains" id="9c2da9b1-a546-4c44-80d1-2507af431ac3" name="Contient &lt;nom&gt;OUEDRAOGO&lt;/nom&gt;"><con:configuration><token>&lt;nom&gt;OUEDRAOGO&lt;/nom&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="a42ce94b-863a-46a6-a500-484b938bd2f7" name="Contient &lt;departement&gt;Informatique&lt;/departement&gt;"><con:configuration><token>&lt;departement&gt;Informatique&lt;/departement&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="901a3529-05fe-4774-89ec-099ab76265b8" name="Employé inexistant"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>getEmployeeDetails</con:operation>
+<con:request name="Employé inexistant" id="940a124d-fb19-4c68-942c-8e314c59a9bf"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:getEmployeeDetailsRequest>
+         <emp:matricule>EMP-9999</emp:matricule>
+      </emp:getEmployeeDetailsRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="04881c2f-b338-45e1-a526-b547af7a3a41" name="Réponse SOAP"/><con:assertion type="Not SOAP Fault Assertion" id="f376a037-543a-4361-ad5a-8bc3fc2988e9" name="SOAP Fault attendu"/><con:assertion type="Simple Contains" id="ea7b8fa0-72d6-4531-9f74-c0aa1e6a5476" name="Contient EMPLOYEE_NOT_FOUND"><con:configuration><token>EMPLOYEE_NOT_FOUND</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="66f051ba-45d0-4146-9319-a6827588549d" name="Contient soap:Client"><con:configuration><token>soap:Client</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="499acd3a-8709-4612-8c68-49e3b9485ce1" name="Matricule mal formé"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>getEmployeeDetails</con:operation>
+<con:request name="Matricule mal formé" id="54b585d8-fe86-4d65-94a3-15458ef51479"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:getEmployeeDetailsRequest>
+         <emp:matricule>123</emp:matricule>
+      </emp:getEmployeeDetailsRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="9a9a4778-2387-4b77-8427-f91bc4617786" name="Réponse SOAP"/><con:assertion type="Not SOAP Fault Assertion" id="96a83147-1e5a-4650-a313-52ee3582b577" name="SOAP Fault attendu"/><con:assertion type="Simple Contains" id="8c1c7316-93ba-4a8a-b73d-91825fbfa772" name="Contient VALIDATION_ERROR"><con:configuration><token>VALIDATION_ERROR</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="b21097c7-8533-40da-bb89-00b6d5a192c2" name="Contient &lt;field&gt;matricule&lt;/field&gt;"><con:configuration><token>&lt;field&gt;matricule&lt;/field&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="c3be4a25-39a3-48e5-8008-63c6fa1b341e" failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="2 - Création puis modification" searchProperties="true"><con:settings/>
+<con:testStep type="request" id="ee87cc63-f22a-4c9b-b6bf-959a81ceb263" name="createEmployee valide"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>createEmployee</con:operation>
+<con:request name="createEmployee valide" id="20282cc2-5a88-4997-87c5-f80f67fb6522"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:createEmployeeRequest>
+         <emp:employee>
+            <emp:matricule>${#TestCase#matricule}</emp:matricule>
+            <emp:nom>Sankara</emp:nom>
+            <emp:prenom>Thomas</emp:prenom>
+            <emp:email>${#TestCase#email}</emp:email>
+            <emp:telephone>+22670000100</emp:telephone>
+            <emp:dateNaissance>1992-05-10</emp:dateNaissance>
+            <emp:dateEmbauche>2024-01-15</emp:dateEmbauche>
+            <emp:departement>FIN</emp:departement>
+            <emp:poste>Analyste financier</emp:poste>
+            <emp:salaire>600000.00</emp:salaire>
+         </emp:employee>
+      </emp:createEmployeeRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="7b28214a-a76b-44ed-a9c7-6cf6cbc7552d" name="Réponse SOAP"/><con:assertion type="SOAP Fault Assertion" id="c75c986a-cafe-4466-b030-9d97cdc26b62" name="Pas de SOAP Fault"/><con:assertion type="Schema Compliance" id="87dcca58-6792-4031-a9d5-fbac16b413f8" name="Conforme au WSDL"><con:configuration/></con:assertion><con:assertion type="Simple Contains" id="e5c892c6-b938-4eb5-9fff-96bd2f081c9d" name="Contient &lt;nom&gt;SANKARA&lt;/nom&gt;"><con:configuration><token>&lt;nom&gt;SANKARA&lt;/nom&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="a9bf6c76-eae0-4987-82e8-455214bd13dc" name="Contient &lt;departement&gt;Finance&lt;/departement&gt;"><con:configuration><token>&lt;departement&gt;Finance&lt;/departement&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="0f2ccc2b-54b2-42bc-b37d-28ee97605af9" name="Contient &lt;statut&gt;ACTIF&lt;/statut&gt;"><con:configuration><token>&lt;statut&gt;ACTIF&lt;/statut&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="4161a7dd-b23a-4e38-ba22-85061736c5c9" name="Contient &lt;source&gt;SOAP&lt;/source&gt;"><con:configuration><token>&lt;source&gt;SOAP&lt;/source&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="4d22bc00-b55a-40c5-86f4-8d442a135e49" name="updateEmployee partiel"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>updateEmployee</con:operation>
+<con:request name="updateEmployee partiel" id="8bd90069-d3c3-4834-89bc-0824574045cf"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:updateEmployeeRequest>
+         <emp:matricule>${#TestCase#matricule}</emp:matricule>
+         <emp:changes>
+            <emp:poste>Chef comptable</emp:poste>
+            <emp:salaire>750000.00</emp:salaire>
+         </emp:changes>
+      </emp:updateEmployeeRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="01925816-89e8-440d-b6ef-4335fbd05975" name="Réponse SOAP"/><con:assertion type="SOAP Fault Assertion" id="d899b281-f420-4042-97ff-4b0d4e7b5aed" name="Pas de SOAP Fault"/><con:assertion type="Schema Compliance" id="41b090d6-0be8-439e-ac94-5088589c79fe" name="Conforme au WSDL"><con:configuration/></con:assertion><con:assertion type="Simple Contains" id="dbb78421-1938-4cb5-90f3-66d6029262ae" name="Contient &lt;poste&gt;Chef comptable&lt;/poste&gt;"><con:configuration><token>&lt;poste&gt;Chef comptable&lt;/poste&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="a1fedf2a-aa9f-46ad-a6c5-cc2030f4ce8e" name="Contient &lt;salaire&gt;750000.00&lt;/salaire&gt;"><con:configuration><token>&lt;salaire&gt;750000.00&lt;/salaire&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="fd57d4af-86ac-439c-88b8-5c237c5f3d2c" name="Champs non fournis inchangés"><con:configuration><token>&lt;prenom&gt;Thomas&lt;/prenom&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="567fed2e-3648-4c80-b3ff-3f1e762ee8ef" name="Relecture après modification"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>getEmployeeDetails</con:operation>
+<con:request name="Relecture après modification" id="09495317-e409-4ca1-a3de-df83bd1321f6"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:getEmployeeDetailsRequest>
+         <emp:matricule>${#TestCase#matricule}</emp:matricule>
+      </emp:getEmployeeDetailsRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="74e9b2e7-5638-4f17-8522-e6a3945c8404" name="Réponse SOAP"/><con:assertion type="SOAP Fault Assertion" id="b94da908-7235-4b05-ae38-532f8a7f5420" name="Pas de SOAP Fault"/><con:assertion type="Simple Contains" id="59b846b6-938f-435f-82d6-9bcf0b9fff78" name="Contient &lt;poste&gt;Chef comptable&lt;/poste&gt;"><con:configuration><token>&lt;poste&gt;Chef comptable&lt;/poste&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:setupScript>def n = new Random().nextInt(8000) + 1000
+testCase.setPropertyValue("matricule", "EMP-" + n)
+testCase.setPropertyValue("email", "agent" + n + "@atser.bf")</con:setupScript><con:properties/></con:testCase><con:testCase id="788a8251-8be9-47b6-b686-b0cbb094b353" failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="3 - Erreurs de création" searchProperties="true"><con:settings/>
+<con:testStep type="request" id="e710ed23-7e81-4691-88de-66c0318820c1" name="Données invalides"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>createEmployee</con:operation>
+<con:request name="Données invalides" id="c2611a75-4fde-4a77-ae10-22f4568d1569"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:createEmployeeRequest>
+         <emp:employee>
+            <emp:matricule>EMP-0101</emp:matricule>
+            <emp:nom>Sankara</emp:nom>
+            <emp:prenom>Thomas</emp:prenom>
+            <emp:email>pas-un-email</emp:email>
+            <emp:dateNaissance>2015-01-01</emp:dateNaissance>
+            <emp:dateEmbauche>2024-01-15</emp:dateEmbauche>
+            <emp:departement>Marketing</emp:departement>
+            <emp:poste>Analyste financier</emp:poste>
+            <emp:salaire>-10</emp:salaire>
+         </emp:employee>
+      </emp:createEmployeeRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="dcf9b3ce-e988-4337-b863-2613c3660c7c" name="Réponse SOAP"/><con:assertion type="Not SOAP Fault Assertion" id="b066381c-1ce9-413c-b35f-7679c617f6ec" name="SOAP Fault attendu"/><con:assertion type="Simple Contains" id="9ad0aca5-1864-474f-b209-bd758ce67642" name="Contient VALIDATION_ERROR"><con:configuration><token>VALIDATION_ERROR</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="a03c73c4-996d-43c3-a9d6-e968e06be65b" name="Contient &lt;field&gt;email&lt;/field&gt;"><con:configuration><token>&lt;field&gt;email&lt;/field&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="454af17e-7703-430e-b848-95ad8c8ff810" name="Contient &lt;field&gt;dateNaissance&lt;/field&gt;"><con:configuration><token>&lt;field&gt;dateNaissance&lt;/field&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="3143ba64-130c-4cd1-9fcc-105eea0f9325" name="Contient &lt;field&gt;departement&lt;/field&gt;"><con:configuration><token>&lt;field&gt;departement&lt;/field&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="05852a19-0410-43f4-a805-ea1b05f0d473" name="Contient &lt;field&gt;salaire&lt;/field&gt;"><con:configuration><token>&lt;field&gt;salaire&lt;/field&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="8b9fd034-918c-447b-a32b-1312e0f6362c" name="Matricule déjà existant"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>createEmployee</con:operation>
+<con:request name="Matricule déjà existant" id="9cea345d-acb0-48e0-9bbf-596b02d54406"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:createEmployeeRequest>
+         <emp:employee>
+            <emp:matricule>EMP-0001</emp:matricule>
+            <emp:nom>Sankara</emp:nom>
+            <emp:prenom>Thomas</emp:prenom>
+            <emp:email>nouveau.doublon@atser.bf</emp:email>
+            <emp:telephone>+22670000100</emp:telephone>
+            <emp:dateNaissance>1992-05-10</emp:dateNaissance>
+            <emp:dateEmbauche>2024-01-15</emp:dateEmbauche>
+            <emp:departement>FIN</emp:departement>
+            <emp:poste>Analyste financier</emp:poste>
+            <emp:salaire>600000.00</emp:salaire>
+         </emp:employee>
+      </emp:createEmployeeRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="62d58162-fa08-47d1-8911-55a4fd93a3a8" name="Réponse SOAP"/><con:assertion type="Not SOAP Fault Assertion" id="ee9e51c4-3260-4e8f-b59c-c90d68fdff61" name="SOAP Fault attendu"/><con:assertion type="Simple Contains" id="fb810728-24c8-44fd-b5fb-e00ea819873e" name="Contient DUPLICATE_EMPLOYEE"><con:configuration><token>DUPLICATE_EMPLOYEE</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="0af9e257-b840-4f20-a3ac-e7a3bc64570b" name="Contient &lt;field&gt;matricule&lt;/field&gt;"><con:configuration><token>&lt;field&gt;matricule&lt;/field&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="89ce94b1-d6c2-4a23-8256-2a0fe24f9e84" name="Email déjà utilisé"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>createEmployee</con:operation>
+<con:request name="Email déjà utilisé" id="be5d0cfa-c044-4df4-a452-f40a72c61afd"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:createEmployeeRequest>
+         <emp:employee>
+            <emp:matricule>${#TestCase#matricule}</emp:matricule>
+            <emp:nom>Sankara</emp:nom>
+            <emp:prenom>Thomas</emp:prenom>
+            <emp:email>awa.ouedraogo@atser.bf</emp:email>
+            <emp:telephone>+22670000100</emp:telephone>
+            <emp:dateNaissance>1992-05-10</emp:dateNaissance>
+            <emp:dateEmbauche>2024-01-15</emp:dateEmbauche>
+            <emp:departement>FIN</emp:departement>
+            <emp:poste>Analyste financier</emp:poste>
+            <emp:salaire>600000.00</emp:salaire>
+         </emp:employee>
+      </emp:createEmployeeRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="41e19a93-8f12-4902-9343-b33742d75803" name="Réponse SOAP"/><con:assertion type="Not SOAP Fault Assertion" id="003a29bd-4774-4691-a88c-1c75575f8a07" name="SOAP Fault attendu"/><con:assertion type="Simple Contains" id="476ae25f-5c77-444b-85f8-aeaa643f531e" name="Contient DUPLICATE_EMPLOYEE"><con:configuration><token>DUPLICATE_EMPLOYEE</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="30344513-3fde-4ab2-81aa-93ebad3c5e53" name="Contient &lt;field&gt;email&lt;/field&gt;"><con:configuration><token>&lt;field&gt;email&lt;/field&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:setupScript>def n = new Random().nextInt(8000) + 1000
+testCase.setPropertyValue("matricule", "EMP-" + n)
+testCase.setPropertyValue("email", "agent" + n + "@atser.bf")</con:setupScript><con:properties/></con:testCase><con:testCase id="7e5963ff-5482-4100-b722-a6fc0095155a" failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="4 - Erreurs de modification" searchProperties="true"><con:settings/>
+<con:testStep type="request" id="c15160db-57ae-406e-b68b-59f1ab55ea88" name="Employé inexistant"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>updateEmployee</con:operation>
+<con:request name="Employé inexistant" id="c77f89ba-46fd-4206-ae69-fab11dce1cde"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:updateEmployeeRequest>
+         <emp:matricule>EMP-9999</emp:matricule>
+         <emp:changes>
+            <emp:poste>Inconnu</emp:poste>
+         </emp:changes>
+      </emp:updateEmployeeRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="aa904611-e4eb-47a5-b59f-77cb8f1dce77" name="Réponse SOAP"/><con:assertion type="Not SOAP Fault Assertion" id="dfd63f75-b212-4aeb-a23c-846e423a8d2f" name="SOAP Fault attendu"/><con:assertion type="Simple Contains" id="1010f907-c77d-4031-847e-e1cbd744efb3" name="Contient EMPLOYEE_NOT_FOUND"><con:configuration><token>EMPLOYEE_NOT_FOUND</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="9035b655-9380-454f-ad2b-f37aa4c4ce0b" name="Email pris par un autre employé"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>updateEmployee</con:operation>
+<con:request name="Email pris par un autre employé" id="ee02ccb1-67d2-443a-93b5-1cd2b59ea9a1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:updateEmployeeRequest>
+         <emp:matricule>EMP-0003</emp:matricule>
+         <emp:changes>
+            <emp:email>awa.ouedraogo@atser.bf</emp:email>
+         </emp:changes>
+      </emp:updateEmployeeRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="d3a45fc9-6464-4f3e-8b84-df7b6d50dd8e" name="Réponse SOAP"/><con:assertion type="Not SOAP Fault Assertion" id="9a5fe471-ccc3-4aeb-80ad-5c5e58f8948f" name="SOAP Fault attendu"/><con:assertion type="Simple Contains" id="e3464cd3-545f-4006-83ef-217e39dc2b7b" name="Contient DUPLICATE_EMPLOYEE"><con:configuration><token>DUPLICATE_EMPLOYEE</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="aaf6fa0f-483a-4418-b5b6-d64ff480ae43" name="Salaire nul"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<con:interface>EmployeeSoapBinding</con:interface><con:operation>updateEmployee</con:operation>
+<con:request name="Salaire nul" id="bf1bcaff-5e7c-4be4-a01c-f2ab283a06b3"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#endpoint}</con:endpoint>
+<con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <emp:updateEmployeeRequest>
+         <emp:matricule>EMP-0003</emp:matricule>
+         <emp:changes>
+            <emp:salaire>0</emp:salaire>
+         </emp:changes>
+      </emp:updateEmployeeRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" id="494b2cfa-52fb-42d7-9ddf-32b3bdb15913" name="Réponse SOAP"/><con:assertion type="Not SOAP Fault Assertion" id="90c31d03-1294-4015-a7ee-870845b29699" name="SOAP Fault attendu"/><con:assertion type="Simple Contains" id="0fb47e47-a1ad-4849-b63f-19506ad1abba" name="Contient VALIDATION_ERROR"><con:configuration><token>VALIDATION_ERROR</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" id="cabc6387-63fd-4d2e-bfea-fd251760f36a" name="Contient &lt;field&gt;salaire&lt;/field&gt;"><con:configuration><token>&lt;field&gt;salaire&lt;/field&gt;</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion>
+<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/>
+<con:wsaConfig mustUnderstand="NONE" version="200508"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:properties/></con:testCase>
+<con:properties/></con:testSuite>
+<con:properties><con:property><con:name>endpoint</con:name><con:value>http://localhost:8080/services/EmployeeService</con:value></con:property></con:properties>
+<con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/></con:soapui-project>

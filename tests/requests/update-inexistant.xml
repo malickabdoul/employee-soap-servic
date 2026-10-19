@@ -1,0 +1,11 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <emp:updateEmployeeRequest>
+      <emp:matricule>EMP-9999</emp:matricule>
+      <emp:changes>
+        <emp:poste>Inconnu</emp:poste>
+      </emp:changes>
+    </emp:updateEmployeeRequest>
+  </soapenv:Body>
+</soapenv:Envelope>

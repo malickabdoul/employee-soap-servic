@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transformation>
+<info><name>pg_to_mysql</name><description>Retour vers MySQL : lit la table outbox employee_changes et répercute les créations et modifications faites via SOAP</description><extended_description/><trans_version/><trans_type>Normal</trans_type>
+<directory>/</directory><parameters><parameter><name>MYSQL_HOST</name><default_value>localhost</default_value><description/></parameter><parameter><name>MYSQL_PORT</name><default_value>3306</default_value><description/></parameter><parameter><name>MYSQL_DB</name><default_value>rh_source</default_value><description/></parameter><parameter><name>MYSQL_USER</name><default_value>etl</default_value><description/></parameter><parameter><name>MYSQL_PASSWORD</name><default_value>etl_pwd</default_value><description/></parameter><parameter><name>PG_HOST</name><default_value>localhost</default_value><description/></parameter><parameter><name>PG_PORT</name><default_value>5432</default_value><description/></parameter><parameter><name>PG_DB</name><default_value>employes_ref</default_value><description/></parameter><parameter><name>PG_USER</name><default_value>etl</default_value><description/></parameter><parameter><name>PG_PASSWORD</name><default_value>etl_pwd</default_value><description/></parameter></parameters>
+<log/><maxdate><connection/><table/><field/><offset>0.0</offset><maxdiff>0.0</maxdiff></maxdate>
+<size_rowset>10000</size_rowset><sleep_time_empty>50</sleep_time_empty><sleep_time_full>50</sleep_time_full>
+<unique_connections>N</unique_connections><feedback_shown>Y</feedback_shown><feedback_size>50000</feedback_size>
+<using_thread_priorities>Y</using_thread_priorities><shared_objects_file/><capture_step_performance>N</capture_step_performance>
+<step_performance_capturing_delay>1000</step_performance_capturing_delay><step_performance_capturing_size_limit>100</step_performance_capturing_size_limit>
+<dependencies/><partitionschemas/><slaveservers/><clusterschemas/>
+<created_user>-</created_user><created_date>2026/10/19 12:00:00.000</created_date><modified_user>-</modified_user><modified_date>2026/10/19 12:00:00.000</modified_date>
+</info>
+<notepads/>
+<connection><name>mysql_source</name><server>${MYSQL_HOST}</server><type>GENERIC</type><access>Native</access>
+<database>${MYSQL_DB}</database><port>${MYSQL_PORT}</port><username>${MYSQL_USER}</username><password>${MYSQL_PASSWORD}</password>
+<servername/><data_tablespace/><index_tablespace/><attributes>
+<attribute><code>PORT_NUMBER</code><attribute>${MYSQL_PORT}</attribute></attribute><attribute><code>CUSTOM_URL</code><attribute>jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Africa/Ouagadougou</attribute></attribute><attribute><code>CUSTOM_DRIVER_CLASS</code><attribute>com.mysql.cj.jdbc.Driver</attribute></attribute>
+<attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>Y</attribute></attribute>
+</attributes></connection><connection><name>pg_reference</name><server>${PG_HOST}</server><type>POSTGRESQL</type><access>Native</access>
+<database>${PG_DB}</database><port>${PG_PORT}</port><username>${PG_USER}</username><password>${PG_PASSWORD}</password>
+<servername/><data_tablespace/><index_tablespace/><attributes>
+<attribute><code>PORT_NUMBER</code><attribute>${PG_PORT}</attribute></attribute>
+<attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>Y</attribute></attribute>
+</attributes></connection>
+<order><hop><from>Lire outbox PG</from><to>Inserer ou maj MySQL</to><enabled>Y</enabled></hop><hop><from>Inserer ou maj MySQL</from><to>Marquer traite</to><enabled>Y</enabled></hop></order>
+<step><name>Lire outbox PG</name><type>TableInput</type><description/><distribute>Y</distribute><custom_distribution/>
+<copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+<connection>pg_reference</connection><sql>SELECT c.id AS change_id, e.matricule, e.nom, e.prenom, e.email, e.telephone, e.date_naissance,
+       e.date_embauche, e.departement, e.poste, e.salaire, e.statut, e.updated_at, 'SOAP' AS source
+FROM employee_changes c
+JOIN employee e ON e.matricule = c.matricule
+WHERE c.processed = FALSE
+ORDER BY c.id</sql><limit>0</limit><lookup/><execute_each_row>N</execute_each_row><variables_active>N</variables_active><lazy_conversion_active>N</lazy_conversion_active>
+<attributes/><cluster_schema/><remotesteps><input></input><output></output></remotesteps>
+<GUI><xloc>80</xloc><yloc>160</yloc><draw>Y</draw></GUI></step><step><name>Inserer ou maj MySQL</name><type>InsertUpdate</type><description/><distribute>Y</distribute><custom_distribution/>
+<copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+<connection>mysql_source</connection><commit>100</commit><update_bypassed>N</update_bypassed><lookup><schema/><table>employes</table><key><name>matricule</name><field>matricule</field><condition>=</condition><name2/></key><value><name>matricule</name><rename>matricule</rename><update>N</update></value><value><name>nom</name><rename>nom</rename><update>Y</update></value><value><name>prenom</name><rename>prenom</rename><update>Y</update></value><value><name>email</name><rename>email</rename><update>Y</update></value><value><name>telephone</name><rename>telephone</rename><update>Y</update></value><value><name>date_naissance</name><rename>date_naissance</rename><update>Y</update></value><value><name>date_embauche</name><rename>date_embauche</rename><update>Y</update></value><value><name>departement</name><rename>departement</rename><update>Y</update></value><value><name>poste</name><rename>poste</rename><update>Y</update></value><value><name>salaire</name><rename>salaire</rename><update>Y</update></value><value><name>statut</name><rename>statut</rename><update>Y</update></value><value><name>source</name><rename>source</rename><update>Y</update></value><value><name>updated_at</name><rename>updated_at</rename><update>Y</update></value></lookup>
+<attributes/><cluster_schema/><remotesteps><input></input><output></output></remotesteps>
+<GUI><xloc>320</xloc><yloc>160</yloc><draw>Y</draw></GUI></step><step><name>Marquer traite</name><type>ExecSQL</type><description/><distribute>Y</distribute><custom_distribution/>
+<copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+<connection>pg_reference</connection><execute_each_row>Y</execute_each_row><single_statement>Y</single_statement><replace_variables>N</replace_variables>
+<quoteString>N</quoteString><sql>UPDATE employee_changes SET processed = TRUE, processed_at = now() WHERE id = ?</sql><set_params>Y</set_params><insert_field/><update_field/><delete_field/><read_field/>
+<arguments><argument><name>change_id</name></argument></arguments>
+<attributes/><cluster_schema/><remotesteps><input></input><output></output></remotesteps>
+<GUI><xloc>560</xloc><yloc>160</yloc><draw>Y</draw></GUI></step>
+<step_error_handling></step_error_handling>
+<slave-step-copy-partition-distribution/><slave_transformation>N</slave_transformation>
+</transformation>

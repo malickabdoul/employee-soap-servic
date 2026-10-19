@@ -1,0 +1,18 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <emp:createEmployeeRequest>
+      <emp:employee>
+        <emp:matricule>EMP-0101</emp:matricule>
+        <emp:nom>Test</emp:nom>
+        <emp:prenom>Invalide</emp:prenom>
+        <emp:email>pas-un-email</emp:email>
+        <emp:dateNaissance>2015-01-01</emp:dateNaissance>
+        <emp:dateEmbauche>2024-01-15</emp:dateEmbauche>
+        <emp:departement>Marketing</emp:departement>
+        <emp:poste>Stagiaire</emp:poste>
+        <emp:salaire>-10</emp:salaire>
+      </emp:employee>
+    </emp:createEmployeeRequest>
+  </soapenv:Body>
+</soapenv:Envelope>

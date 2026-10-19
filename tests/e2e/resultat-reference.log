@@ -1,0 +1,33 @@
+== 0. Préparation : matricule de test EMP-0896
+  [OK]    WSDL publié
+== 1. Insertion d'un employé dans MySQL (données à normaliser)
+  [OK]    Ligne présente dans MySQL
+== 2. Synchronisation aller MySQL -> PostgreSQL (Pentaho)
+  [OK]    Job sync_mysql_to_pg terminé sans erreur
+  [OK]    Employé normalisé dans PostgreSQL
+== 3. Lecture via SOAP : getEmployeeDetails
+  [OK]    Réponse contient le nom normalisé
+  [OK]    Réponse contient l'email en minuscules
+== 4. Modification via SOAP : updateEmployee
+  [OK]    Poste modifié
+  [OK]    Source passée à SOAP
+  [OK]    Modification inscrite dans l'outbox
+== 5. Synchronisation retour PostgreSQL -> MySQL (Pentaho)
+  [OK]    Job sync_pg_to_mysql terminé sans erreur
+  [OK]    MySQL a reçu la modification
+  [OK]    Outbox marquée traitée
+== 6. Nouvelle synchronisation aller : pas de retour arrière ni de boucle
+  [OK]    Job relancé
+  [OK]    PostgreSQL garde la valeur SOAP
+== 7. Erreurs SOAP (Fault)
+  [OK]    Employé inexistant -> EMPLOYEE_NOT_FOUND
+  [OK]    Création invalide -> VALIDATION_ERROR
+  [OK]    Création en doublon -> DUPLICATE_EMPLOYEE
+  [OK]    Base arrêtée -> DATA_ACCESS_ERROR
+  [OK]    Service rétabli après redémarrage de la base
+== 8. Supervision Netdata
+  [OK]    Netdata collecte les métriques SOAP (cxf_server_requests)
+  [OK]    Netdata collecte PostgreSQL
+  [OK]    Netdata collecte MySQL
+  [OK]    Alerte de disponibilité du service chargée
+Résultat : 23 réussis, 0 en échec

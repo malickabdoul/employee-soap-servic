@@ -1,0 +1,19 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <emp:createEmployeeRequest>
+      <emp:employee>
+        <emp:matricule>EMP-0100</emp:matricule>
+        <emp:nom>Sankara</emp:nom>
+        <emp:prenom>Thomas</emp:prenom>
+        <emp:email>thomas.sankara@atser.bf</emp:email>
+        <emp:telephone>+22670000100</emp:telephone>
+        <emp:dateNaissance>1992-05-10</emp:dateNaissance>
+        <emp:dateEmbauche>2024-01-15</emp:dateEmbauche>
+        <emp:departement>FIN</emp:departement>
+        <emp:poste>Analyste financier</emp:poste>
+        <emp:salaire>600000.00</emp:salaire>
+      </emp:employee>
+    </emp:createEmployeeRequest>
+  </soapenv:Body>
+</soapenv:Envelope>

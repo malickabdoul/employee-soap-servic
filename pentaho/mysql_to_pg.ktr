@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transformation>
+<info><name>mysql_to_pg</name><description>Extraction MySQL, nettoyage, normalisation des départements, validation et chargement de la zone de transit PostgreSQL</description><extended_description/><trans_version/><trans_type>Normal</trans_type>
+<directory>/</directory><parameters><parameter><name>MYSQL_HOST</name><default_value>localhost</default_value><description/></parameter><parameter><name>MYSQL_PORT</name><default_value>3306</default_value><description/></parameter><parameter><name>MYSQL_DB</name><default_value>rh_source</default_value><description/></parameter><parameter><name>MYSQL_USER</name><default_value>etl</default_value><description/></parameter><parameter><name>MYSQL_PASSWORD</name><default_value>etl_pwd</default_value><description/></parameter><parameter><name>PG_HOST</name><default_value>localhost</default_value><description/></parameter><parameter><name>PG_PORT</name><default_value>5432</default_value><description/></parameter><parameter><name>PG_DB</name><default_value>employes_ref</default_value><description/></parameter><parameter><name>PG_USER</name><default_value>etl</default_value><description/></parameter><parameter><name>PG_PASSWORD</name><default_value>etl_pwd</default_value><description/></parameter></parameters>
+<log/><maxdate><connection/><table/><field/><offset>0.0</offset><maxdiff>0.0</maxdiff></maxdate>
+<size_rowset>10000</size_rowset><sleep_time_empty>50</sleep_time_empty><sleep_time_full>50</sleep_time_full>
+<unique_connections>N</unique_connections><feedback_shown>Y</feedback_shown><feedback_size>50000</feedback_size>
+<using_thread_priorities>Y</using_thread_priorities><shared_objects_file/><capture_step_performance>N</capture_step_performance>
+<step_performance_capturing_delay>1000</step_performance_capturing_delay><step_performance_capturing_size_limit>100</step_performance_capturing_size_limit>
+<dependencies/><partitionschemas/><slaveservers/><clusterschemas/>
+<created_user>-</created_user><created_date>2026/10/19 12:00:00.000</created_date><modified_user>-</modified_user><modified_date>2026/10/19 12:00:00.000</modified_date>
+</info>
+<notepads/>
+<connection><name>mysql_source</name><server>${MYSQL_HOST}</server><type>GENERIC</type><access>Native</access>
+<database>${MYSQL_DB}</database><port>${MYSQL_PORT}</port><username>${MYSQL_USER}</username><password>${MYSQL_PASSWORD}</password>
+<servername/><data_tablespace/><index_tablespace/><attributes>
+<attribute><code>PORT_NUMBER</code><attribute>${MYSQL_PORT}</attribute></attribute><attribute><code>CUSTOM_URL</code><attribute>jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Africa/Ouagadougou</attribute></attribute><attribute><code>CUSTOM_DRIVER_CLASS</code><attribute>com.mysql.cj.jdbc.Driver</attribute></attribute>
+<attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>Y</attribute></attribute>
+</attributes></connection><connection><name>pg_reference</name><server>${PG_HOST}</server><type>POSTGRESQL</type><access>Native</access>
+<database>${PG_DB}</database><port>${PG_PORT}</port><username>${PG_USER}</username><password>${PG_PASSWORD}</password>
+<servername/><data_tablespace/><index_tablespace/><attributes>
+<attribute><code>PORT_NUMBER</code><attribute>${PG_PORT}</attribute></attribute>
+<attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>Y</attribute></attribute>
+</attributes></connection>
+<order><hop><from>Lire employes MySQL</from><to>Nettoyer textes</to><enabled>Y</enabled></hop><hop><from>Nettoyer textes</from><to>Normaliser departement</to><enabled>Y</enabled></hop><hop><from>Normaliser departement</from><to>Valider regles</to><enabled>Y</enabled></hop><hop><from>Valider regles</from><to>Ligne valide ?</to><enabled>Y</enabled></hop><hop><from>Ligne valide ?</from><to>Zone de transit PG</to><enabled>Y</enabled></hop><hop><from>Ligne valide ?</from><to>Rejets PG</to><enabled>Y</enabled></hop></order>
+<step><name>Lire employes MySQL</name><type>TableInput</type><description/><distribute>Y</distribute><custom_distribution/>
+<copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+<connection>mysql_source</connection><sql>SELECT matricule, nom, prenom, email, telephone, date_naissance, date_embauche,
+       departement, poste, salaire, statut, updated_at
+FROM employes
+ORDER BY matricule</sql><limit>0</limit><lookup/><execute_each_row>N</execute_each_row><variables_active>N</variables_active><lazy_conversion_active>N</lazy_conversion_active>
+<attributes/><cluster_schema/><remotesteps><input></input><output></output></remotesteps>
+<GUI><xloc>80</xloc><yloc>160</yloc><draw>Y</draw></GUI></step><step><name>Nettoyer textes</name><type>StringOperations</type><description/><distribute>Y</distribute><custom_distribution/>
+<copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+<fields><field><in_stream_name>matricule</in_stream_name><out_stream_name/><trim_type>both</trim_type>
+<lower_upper>upper</lower_upper><padding_type>none</padding_type><pad_char/><pad_len/><init_cap>no</init_cap><mask_xml>none</mask_xml>
+<digits>none</digits><remove_special_characters>none</remove_special_characters></field><field><in_stream_name>nom</in_stream_name><out_stream_name/><trim_type>both</trim_type>
+<lower_upper>upper</lower_upper><padding_type>none</padding_type><pad_char/><pad_len/><init_cap>no</init_cap><mask_xml>none</mask_xml>
+<digits>none</digits><remove_special_characters>none</remove_special_characters></field><field><in_stream_name>prenom</in_stream_name><out_stream_name/><trim_type>both</trim_type>
+<lower_upper>none</lower_upper><padding_type>none</padding_type><pad_char/><pad_len/><init_cap>no</init_cap><mask_xml>none</mask_xml>
+<digits>none</digits><remove_special_characters>none</remove_special_characters></field><field><in_stream_name>email</in_stream_name><out_stream_name/><trim_type>both</trim_type>
+<lower_upper>lower</lower_upper><padding_type>none</padding_type><pad_char/><pad_len/><init_cap>no</init_cap><mask_xml>none</mask_xml>
+<digits>none</digits><remove_special_characters>none</remove_special_characters></field><field><in_stream_name>telephone</in_stream_name><out_stream_name/><trim_type>both</trim_type>
+<lower_upper>none</lower_upper><padding_type>none</padding_type><pad_char/><pad_len/><init_cap>no</init_cap><mask_xml>none</mask_xml>
+<digits>none</digits><remove_special_characters>none</remove_special_characters></field><field><in_stream_name>departement</in_stream_name><out_stream_name/><trim_type>both</trim_type>
+<lower_upper>upper</lower_upper><padding_type>none</padding_type><pad_char/><pad_len/><init_cap>no</init_cap><mask_xml>none</mask_xml>
+<digits>none</digits><remove_special_characters>none</remove_special_characters></field><field><in_stream_name>poste</in_stream_name><out_stream_name/><trim_type>both</trim_type>
+<lower_upper>none</lower_upper><padding_type>none</padding_type><pad_char/><pad_len/><init_cap>no</init_cap><mask_xml>none</mask_xml>
+<digits>none</digits><remove_special_characters>none</remove_special_characters></field><field><in_stream_name>statut</in_stream_name><out_stream_name/><trim_type>both</trim_type>
+<lower_upper>upper</lower_upper><padding_type>none</padding_type><pad_char/><pad_len/><init_cap>no</init_cap><mask_xml>none</mask_xml>
+<digits>none</digits><remove_special_characters>none</remove_special_characters></field></fields>
+<attributes/><cluster_schema/><remotesteps><input></input><output></output></remotesteps>
+<GUI><xloc>260</xloc><yloc>160</yloc><draw>Y</draw></GUI></step><step><name>Normaliser departement</name><type>ValueMapper</type><description/><distribute>Y</distribute><custom_distribution/>
+<copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+<field_to_use>departement</field_to_use><target_field>departement_norm</target_field><non_match_default/><fields><field><source_value>INFORMATIQUE</source_value><target_value>Informatique</target_value></field><field><source_value>INFO</source_value><target_value>Informatique</target_value></field><field><source_value>DSI</source_value><target_value>Informatique</target_value></field><field><source_value>RH</source_value><target_value>Ressources humaines</target_value></field><field><source_value>RESSOURCES HUMAINES</source_value><target_value>Ressources humaines</target_value></field><field><source_value>FINANCE</source_value><target_value>Finance</target_value></field><field><source_value>FIN</source_value><target_value>Finance</target_value></field><field><source_value>COMMERCIAL</source_value><target_value>Commercial</target_value></field><field><source_value>COM</source_value><target_value>Commercial</target_value></field><field><source_value>LOGISTIQUE</source_value><target_value>Logistique</target_value></field><field><source_value>LOG</source_value><target_value>Logistique</target_value></field><field><source_value>DIRECTION</source_value><target_value>Direction</target_value></field><field><source_value>DIR</source_value><target_value>Direction</target_value></field></fields>
+<attributes/><cluster_schema/><remotesteps><input></input><output></output></remotesteps>
+<GUI><xloc>440</xloc><yloc>160</yloc><draw>Y</draw></GUI></step><step><name>Valider regles</name><type>ScriptValueMod</type><description/><distribute>Y</distribute><custom_distribution/>
+<copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+<compatible>N</compatible><optimizationLevel>9</optimizationLevel><jsScripts><jsScript><jsScript_type>0</jsScript_type>
+<jsScript_name>Validation</jsScript_name><jsScript_script>// Contrôle des règles du modèle commun d'employé.
+// motif reste null si la ligne est valide, sinon il contient la liste des erreurs.
+var erreurs = [];
+var reEmail = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+if (matricule == null || matricule == "") erreurs.push("matricule obligatoire");
+if (nom == null || nom == "") erreurs.push("nom obligatoire");
+if (prenom == null || prenom == "") erreurs.push("prenom obligatoire");
+if (email == null || !reEmail.test(email)) erreurs.push("email invalide");
+if (departement_norm == null || departement_norm == "") erreurs.push("departement inconnu: " + departement);
+if (poste == null || poste == "") erreurs.push("poste obligatoire");
+if (salaire == null || salaire &lt;= 0) erreurs.push("salaire doit etre &gt; 0");
+if (date_naissance == null) erreurs.push("date_naissance obligatoire");
+if (date_embauche == null) erreurs.push("date_embauche obligatoire");
+var statutOk = (statut == "ACTIF" || statut == "SUSPENDU" || statut == "SORTI");
+if (!statutOk) erreurs.push("statut invalide: " + statut);
+var motif = erreurs.length &gt; 0 ? erreurs.join("; ") : null;
+</jsScript_script></jsScript></jsScripts>
+<fields><field><name>motif</name><rename>motif</rename><type>String</type><length>255</length><precision>-1</precision><replace>N</replace></field></fields>
+<attributes/><cluster_schema/><remotesteps><input></input><output></output></remotesteps>
+<GUI><xloc>620</xloc><yloc>160</yloc><draw>Y</draw></GUI></step><step><name>Ligne valide ?</name><type>FilterRows</type><description/><distribute>Y</distribute><custom_distribution/>
+<copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+<send_true_to>Zone de transit PG</send_true_to><send_false_to>Rejets PG</send_false_to>
+<compare><condition><negate>N</negate><leftvalue>motif</leftvalue><function>IS NULL</function><rightvalue/></condition></compare>
+<attributes/><cluster_schema/><remotesteps><input></input><output></output></remotesteps>
+<GUI><xloc>800</xloc><yloc>160</yloc><draw>Y</draw></GUI></step><step><name>Zone de transit PG</name><type>TableOutput</type><description/><distribute>Y</distribute><custom_distribution/>
+<copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+<connection>pg_reference</connection><schema/><table>stg_employee</table><commit>1000</commit><truncate>N</truncate>
+<ignore_errors>N</ignore_errors><use_batch>Y</use_batch><specify_fields>Y</specify_fields><partitioning_enabled>N</partitioning_enabled>
+<partitioning_field/><partitioning_daily>N</partitioning_daily><partitioning_monthly>Y</partitioning_monthly><tablename_in_field>N</tablename_in_field>
+<tablename_field/><tablename_in_table>Y</tablename_in_table><return_keys>N</return_keys><return_field/><fields><field><column_name>matricule</column_name><stream_name>matricule</stream_name></field><field><column_name>nom</column_name><stream_name>nom</stream_name></field><field><column_name>prenom</column_name><stream_name>prenom</stream_name></field><field><column_name>email</column_name><stream_name>email</stream_name></field><field><column_name>telephone</column_name><stream_name>telephone</stream_name></field><field><column_name>date_naissance</column_name><stream_name>date_naissance</stream_name></field><field><column_name>date_embauche</column_name><stream_name>date_embauche</stream_name></field><field><column_name>departement</column_name><stream_name>departement_norm</stream_name></field><field><column_name>poste</column_name><stream_name>poste</stream_name></field><field><column_name>salaire</column_name><stream_name>salaire</stream_name></field><field><column_name>statut</column_name><stream_name>statut</stream_name></field><field><column_name>updated_at</column_name><stream_name>updated_at</stream_name></field></fields>
+<attributes/><cluster_schema/><remotesteps><input></input><output></output></remotesteps>
+<GUI><xloc>980</xloc><yloc>80</yloc><draw>Y</draw></GUI></step><step><name>Rejets PG</name><type>TableOutput</type><description/><distribute>Y</distribute><custom_distribution/>
+<copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+<connection>pg_reference</connection><schema/><table>sync_reject</table><commit>1000</commit><truncate>N</truncate>
+<ignore_errors>N</ignore_errors><use_batch>Y</use_batch><specify_fields>Y</specify_fields><partitioning_enabled>N</partitioning_enabled>
+<partitioning_field/><partitioning_daily>N</partitioning_daily><partitioning_monthly>Y</partitioning_monthly><tablename_in_field>N</tablename_in_field>
+<tablename_field/><tablename_in_table>Y</tablename_in_table><return_keys>N</return_keys><return_field/><fields><field><column_name>matricule</column_name><stream_name>matricule</stream_name></field><field><column_name>nom</column_name><stream_name>nom</stream_name></field><field><column_name>email</column_name><stream_name>email</stream_name></field><field><column_name>salaire</column_name><stream_name>salaire</stream_name></field><field><column_name>departement</column_name><stream_name>departement</stream_name></field><field><column_name>motif</column_name><stream_name>motif</stream_name></field></fields>
+<attributes/><cluster_schema/><remotesteps><input></input><output></output></remotesteps>
+<GUI><xloc>980</xloc><yloc>260</yloc><draw>Y</draw></GUI></step>
+<step_error_handling></step_error_handling>
+<slave-step-copy-partition-distribution/><slave_transformation>N</slave_transformation>
+</transformation>

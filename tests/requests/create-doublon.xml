@@ -1,0 +1,18 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <emp:createEmployeeRequest>
+      <emp:employee>
+        <emp:matricule>EMP-0001</emp:matricule>
+        <emp:nom>Doublon</emp:nom>
+        <emp:prenom>Test</emp:prenom>
+        <emp:email>doublon@atser.bf</emp:email>
+        <emp:dateNaissance>1990-01-01</emp:dateNaissance>
+        <emp:dateEmbauche>2020-01-01</emp:dateEmbauche>
+        <emp:departement>Informatique</emp:departement>
+        <emp:poste>Développeur</emp:poste>
+        <emp:salaire>500000</emp:salaire>
+      </emp:employee>
+    </emp:createEmployeeRequest>
+  </soapenv:Body>
+</soapenv:Envelope>
