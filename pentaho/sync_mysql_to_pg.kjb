@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job><name>sync_mysql_to_pg</name><description>Synchronisation aller MySQL -&gt; PostgreSQL (base de référence)</description><extended_description/><job_version/><job_status>0</job_status>
+<directory>/</directory><created_user>-</created_user><created_date>2026/10/19 12:00:00.000</created_date><modified_user>-</modified_user><modified_date>2026/10/19 12:00:00.000</modified_date>
+<parameters><parameter><name>MYSQL_HOST</name><default_value>localhost</default_value><description/></parameter><parameter><name>MYSQL_PORT</name><default_value>3306</default_value><description/></parameter><parameter><name>MYSQL_DB</name><default_value>rh_source</default_value><description/></parameter><parameter><name>MYSQL_USER</name><default_value>etl</default_value><description/></parameter><parameter><name>MYSQL_PASSWORD</name><default_value>etl_pwd</default_value><description/></parameter><parameter><name>PG_HOST</name><default_value>localhost</default_value><description/></parameter><parameter><name>PG_PORT</name><default_value>5432</default_value><description/></parameter><parameter><name>PG_DB</name><default_value>employes_ref</default_value><description/></parameter><parameter><name>PG_USER</name><default_value>etl</default_value><description/></parameter><parameter><name>PG_PASSWORD</name><default_value>etl_pwd</default_value><description/></parameter></parameters>
+<connection><name>mysql_source</name><server>${MYSQL_HOST}</server><type>GENERIC</type><access>Native</access>
+<database>${MYSQL_DB}</database><port>${MYSQL_PORT}</port><username>${MYSQL_USER}</username><password>${MYSQL_PASSWORD}</password>
+<servername/><data_tablespace/><index_tablespace/><attributes>
+<attribute><code>PORT_NUMBER</code><attribute>${MYSQL_PORT}</attribute></attribute><attribute><code>CUSTOM_URL</code><attribute>jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Africa/Ouagadougou</attribute></attribute><attribute><code>CUSTOM_DRIVER_CLASS</code><attribute>com.mysql.cj.jdbc.Driver</attribute></attribute>
+<attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>Y</attribute></attribute>
+</attributes></connection><connection><name>pg_reference</name><server>${PG_HOST}</server><type>POSTGRESQL</type><access>Native</access>
+<database>${PG_DB}</database><port>${PG_PORT}</port><username>${PG_USER}</username><password>${PG_PASSWORD}</password>
+<servername/><data_tablespace/><index_tablespace/><attributes>
+<attribute><code>PORT_NUMBER</code><attribute>${PG_PORT}</attribute></attribute>
+<attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
+<attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>Y</attribute></attribute>
+</attributes></connection>
+<slaveservers/><job-log-table><connection/><schema/><table/><size_limit_lines/><interval/><timeout_days/></job-log-table>
+<jobentry-log-table><connection/><schema/><table/><timeout_days/></jobentry-log-table><channel-log-table><connection/><schema/><table/><timeout_days/></channel-log-table>
+<checkpoint-log-table><connection/><schema/><table/><timeout_days/></checkpoint-log-table>
+<pass_batchid>N</pass_batchid><shared_objects_file/>
+<entries><entry><name>START</name><description/><type>SPECIAL</type><attributes/><start>Y</start><dummy>N</dummy><repeat>N</repeat><schedulerType>0</schedulerType><intervalSeconds>0</intervalSeconds>
+<intervalMinutes>60</intervalMinutes><hour>12</hour><minutes>0</minutes><weekDay>1</weekDay><DayOfMonth>1</DayOfMonth>
+<parallel>N</parallel><draw>Y</draw><nr>0</nr><xloc>40</xloc><yloc>160</yloc><attributes_kjc/></entry><entry><name>Vider zone de transit</name><description/><type>SQL</type><attributes/><sql>TRUNCATE TABLE stg_employee;</sql><useVariableSubstitution>F</useVariableSubstitution><sqlfromfile>F</sqlfromfile><sqlfilename/><sendOneStatement>F</sendOneStatement><connection>pg_reference</connection>
+<parallel>N</parallel><draw>Y</draw><nr>0</nr><xloc>200</xloc><yloc>160</yloc><attributes_kjc/></entry><entry><name>MySQL vers transit</name><description/><type>TRANS</type><attributes/><specification_method>filename</specification_method><trans_object_id/><filename>${Internal.Entry.Current.Directory}/mysql_to_pg.ktr</filename>
+<transname/><arg_from_previous>N</arg_from_previous><params_from_previous>N</params_from_previous><exec_per_row>N</exec_per_row>
+<clear_rows>N</clear_rows><clear_files>N</clear_files><set_logfile>N</set_logfile><logfile/><logext/><add_date>N</add_date><add_time>N</add_time>
+<loglevel>Basic</loglevel><cluster>N</cluster><slave_server_name/><set_append_logfile>N</set_append_logfile><wait_until_finished>Y</wait_until_finished>
+<follow_abort_remote>N</follow_abort_remote><create_parent_folder>N</create_parent_folder><logging_remote_work>N</logging_remote_work>
+<run_configuration>Pentaho local</run_configuration><suppress_result_data>N</suppress_result_data><parameters><pass_all_parameters>Y</pass_all_parameters></parameters>
+<parallel>N</parallel><draw>Y</draw><nr>0</nr><xloc>380</xloc><yloc>160</yloc><attributes_kjc/></entry><entry><name>Fusionner dans employee</name><description/><type>SQL</type><attributes/><sql>-- Fusion de la zone de transit dans la base de référence (exécutée par le job Pentaho).
+-- Règle de conflit : la modification la plus récente gagne. Une ligne modifiée via SOAP
+-- après la dernière modification MySQL n'est donc jamais écrasée.
+INSERT INTO employee AS e (matricule, nom, prenom, email, telephone, date_naissance, date_embauche,
+                           departement, poste, salaire, statut, source, updated_at)
+SELECT matricule, nom, prenom, email, telephone, date_naissance, date_embauche,
+       departement, poste, salaire, statut, 'MYSQL', updated_at
+FROM stg_employee
+ON CONFLICT (matricule) DO UPDATE SET
+  nom = EXCLUDED.nom, prenom = EXCLUDED.prenom, email = EXCLUDED.email,
+  telephone = EXCLUDED.telephone, date_naissance = EXCLUDED.date_naissance,
+  date_embauche = EXCLUDED.date_embauche, departement = EXCLUDED.departement,
+  poste = EXCLUDED.poste, salaire = EXCLUDED.salaire, statut = EXCLUDED.statut,
+  source = 'MYSQL', updated_at = EXCLUDED.updated_at
+WHERE e.updated_at &lt; EXCLUDED.updated_at;
+</sql><useVariableSubstitution>F</useVariableSubstitution><sqlfromfile>F</sqlfromfile><sqlfilename/><sendOneStatement>F</sendOneStatement><connection>pg_reference</connection>
+<parallel>N</parallel><draw>Y</draw><nr>0</nr><xloc>560</xloc><yloc>160</yloc><attributes_kjc/></entry><entry><name>Journaliser execution</name><description/><type>SQL</type><attributes/><sql>INSERT INTO sync_run(direction, rows_merged, rows_rejected)
+SELECT 'MYSQL_TO_PG',
+       (SELECT count(*) FROM stg_employee),
+       (SELECT count(*) FROM sync_reject WHERE rejected_at &gt;= now() - interval '5 minutes');</sql><useVariableSubstitution>F</useVariableSubstitution><sqlfromfile>F</sqlfromfile><sqlfilename/><sendOneStatement>F</sendOneStatement><connection>pg_reference</connection>
+<parallel>N</parallel><draw>Y</draw><nr>0</nr><xloc>740</xloc><yloc>160</yloc><attributes_kjc/></entry><entry><name>Succes</name><description/><type>SUCCESS</type><attributes/>
+<parallel>N</parallel><draw>Y</draw><nr>0</nr><xloc>920</xloc><yloc>160</yloc><attributes_kjc/></entry></entries>
+<hops><hop><from>START</from><to>Vider zone de transit</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>Y</unconditional></hop><hop><from>Vider zone de transit</from><to>MySQL vers transit</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>N</unconditional></hop><hop><from>MySQL vers transit</from><to>Fusionner dans employee</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>N</unconditional></hop><hop><from>Fusionner dans employee</from><to>Journaliser execution</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>N</unconditional></hop><hop><from>Journaliser execution</from><to>Succes</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>N</unconditional></hop></hops>
+<notepads/><attributes/></job>

@@ -1,0 +1,8 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="http://ws.employes.ibam.bf/v1">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <emp:getEmployeeDetailsRequest>
+      <emp:matricule>EMP-9999</emp:matricule>
+    </emp:getEmployeeDetailsRequest>
+  </soapenv:Body>
+</soapenv:Envelope>

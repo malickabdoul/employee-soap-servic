@@ -1,0 +1,91 @@
+name: employee-soap
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: es-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pwd
+      MYSQL_DATABASE: rh_source
+      TZ: Africa/Ouagadougou
+    ports: ["3306:3306"]
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./db/mysql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_pwd"]
+      interval: 5s
+      retries: 30
+
+  postgres:
+    image: postgres:16
+    container_name: es-postgres
+    environment:
+      POSTGRES_DB: employes_ref
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_pwd
+      TZ: Africa/Ouagadougou
+      PGTZ: Africa/Ouagadougou
+    ports: ["5432:5432"]
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./db/postgres/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./db/postgres/02_users.sql:/docker-entrypoint-initdb.d/02_users.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d employes_ref"]
+      interval: 5s
+      retries: 30
+
+  employee-service:
+    build: ./service
+    container_name: es-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/employes_ref
+      DB_USER: app
+      DB_PASSWORD: app_pwd
+    ports: ["8080:8080"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      start_period: 30s
+      retries: 10
+
+  netdata:
+    image: netdata/netdata:stable
+    container_name: es-netdata
+    hostname: employee-soap-netdata
+    pid: host
+    cap_add: [SYS_PTRACE, SYS_ADMIN]
+    security_opt: [apparmor:unconfined]
+    ports: ["19999:19999"]
+    volumes:
+      - ./netdata/go.d/mysql.conf:/etc/netdata/go.d/mysql.conf:ro
+      - ./netdata/go.d/postgres.conf:/etc/netdata/go.d/postgres.conf:ro
+      - ./netdata/go.d/prometheus.conf:/etc/netdata/go.d/prometheus.conf:ro
+      - ./netdata/health.d/employee_service.conf:/etc/netdata/health.d/employee_service.conf:ro
+      - netdata-config:/etc/netdata
+      - netdata-lib:/var/lib/netdata
+      - netdata-cache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      employee-service:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
+  pg-data:
+  netdata-config:
+  netdata-lib:
+  netdata-cache:

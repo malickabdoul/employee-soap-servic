@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Contrat du service SOAP de gestion des employés (approche contract-first).
+  Les classes Java sont générées à partir de ce fichier par cxf-codegen-plugin.
+-->
+<wsdl:definitions name="EmployeeService"
+    targetNamespace="http://ws.employes.ibam.bf/v1"
+    xmlns:tns="http://ws.employes.ibam.bf/v1"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <wsdl:documentation>
+    Service de gestion des employés. Base de référence : PostgreSQL.
+    Opérations : getEmployeeDetails, createEmployee, updateEmployee.
+    Erreurs : EmployeeNotFoundFault, ValidationFault, DuplicateEmployeeFault, DataAccessFault.
+  </wsdl:documentation>
+
+  <wsdl:types>
+    <xs:schema targetNamespace="http://ws.employes.ibam.bf/v1" elementFormDefault="qualified">
+
+      <xs:simpleType name="Statut">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="ACTIF"/>
+          <xs:enumeration value="SUSPENDU"/>
+          <xs:enumeration value="SORTI"/>
+        </xs:restriction>
+      </xs:simpleType>
+
+      <!-- Employé tel que stocké dans la base de référence -->
+      <xs:complexType name="Employee">
+        <xs:sequence>
+          <xs:element name="matricule" type="xs:string"/>
+          <xs:element name="nom" type="xs:string"/>
+          <xs:element name="prenom" type="xs:string"/>
+          <xs:element name="email" type="xs:string"/>
+          <xs:element name="telephone" type="xs:string" minOccurs="0"/>
+          <xs:element name="dateNaissance" type="xs:date"/>
+          <xs:element name="dateEmbauche" type="xs:date"/>
+          <xs:element name="departement" type="xs:string"/>
+          <xs:element name="poste" type="xs:string"/>
+          <xs:element name="salaire" type="xs:decimal"/>
+          <xs:element name="statut" type="tns:Statut"/>
+          <xs:element name="source" type="xs:string"/>
+          <xs:element name="updatedAt" type="xs:dateTime"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <!-- Données fournies à la création (tous les champs du modèle commun) -->
+      <xs:complexType name="NewEmployee">
+        <xs:sequence>
+          <xs:element name="matricule" type="xs:string"/>
+          <xs:element name="nom" type="xs:string"/>
+          <xs:element name="prenom" type="xs:string"/>
+          <xs:element name="email" type="xs:string"/>
+          <xs:element name="telephone" type="xs:string" minOccurs="0"/>
+          <xs:element name="dateNaissance" type="xs:date"/>
+          <xs:element name="dateEmbauche" type="xs:date"/>
+          <xs:element name="departement" type="xs:string"/>
+          <xs:element name="poste" type="xs:string"/>
+          <xs:element name="salaire" type="xs:decimal"/>
+          <xs:element name="statut" type="tns:Statut" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <!-- Modification partielle : seuls les champs présents sont modifiés -->
+      <xs:complexType name="EmployeeChanges">
+        <xs:sequence>
+          <xs:element name="nom" type="xs:string" minOccurs="0"/>
+          <xs:element name="prenom" type="xs:string" minOccurs="0"/>
+          <xs:element name="email" type="xs:string" minOccurs="0"/>
+          <xs:element name="telephone" type="xs:string" minOccurs="0"/>
+          <xs:element name="dateNaissance" type="xs:date" minOccurs="0"/>
+          <xs:element name="dateEmbauche" type="xs:date" minOccurs="0"/>
+          <xs:element name="departement" type="xs:string" minOccurs="0"/>
+          <xs:element name="poste" type="xs:string" minOccurs="0"/>
+          <xs:element name="salaire" type="xs:decimal" minOccurs="0"/>
+          <xs:element name="statut" type="tns:Statut" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="FieldError">
+        <xs:sequence>
+          <xs:element name="field" type="xs:string"/>
+          <xs:element name="message" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <!-- Contenu commun à toutes les erreurs SOAP (élément detail du Fault) -->
+      <xs:complexType name="ServiceFaultInfo">
+        <xs:sequence>
+          <xs:element name="code" type="xs:string"/>
+          <xs:element name="message" type="xs:string"/>
+          <xs:element name="fieldErrors" type="tns:FieldError" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:element name="getEmployeeDetailsRequest">
+        <xs:complexType><xs:sequence>
+          <xs:element name="matricule" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="getEmployeeDetailsResponse">
+        <xs:complexType><xs:sequence>
+          <xs:element name="employee" type="tns:Employee"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+
+      <xs:element name="createEmployeeRequest">
+        <xs:complexType><xs:sequence>
+          <xs:element name="employee" type="tns:NewEmployee"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="createEmployeeResponse">
+        <xs:complexType><xs:sequence>
+          <xs:element name="employee" type="tns:Employee"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+
+      <xs:element name="updateEmployeeRequest">
+        <xs:complexType><xs:sequence>
+          <xs:element name="matricule" type="xs:string"/>
+          <xs:element name="changes" type="tns:EmployeeChanges"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="updateEmployeeResponse">
+        <xs:complexType><xs:sequence>
+          <xs:element name="employee" type="tns:Employee"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+
+      <xs:element name="employeeNotFoundFault" type="tns:ServiceFaultInfo"/>
+      <xs:element name="validationFault" type="tns:ServiceFaultInfo"/>
+      <xs:element name="duplicateEmployeeFault" type="tns:ServiceFaultInfo"/>
+      <xs:element name="dataAccessFault" type="tns:ServiceFaultInfo"/>
+    </xs:schema>
+  </wsdl:types>
+
+  <wsdl:message name="getEmployeeDetailsRequest"><wsdl:part name="parameters" element="tns:getEmployeeDetailsRequest"/></wsdl:message>
+  <wsdl:message name="getEmployeeDetailsResponse"><wsdl:part name="parameters" element="tns:getEmployeeDetailsResponse"/></wsdl:message>
+  <wsdl:message name="createEmployeeRequest"><wsdl:part name="parameters" element="tns:createEmployeeRequest"/></wsdl:message>
+  <wsdl:message name="createEmployeeResponse"><wsdl:part name="parameters" element="tns:createEmployeeResponse"/></wsdl:message>
+  <wsdl:message name="updateEmployeeRequest"><wsdl:part name="parameters" element="tns:updateEmployeeRequest"/></wsdl:message>
+  <wsdl:message name="updateEmployeeResponse"><wsdl:part name="parameters" element="tns:updateEmployeeResponse"/></wsdl:message>
+  <wsdl:message name="EmployeeNotFoundFault"><wsdl:part name="fault" element="tns:employeeNotFoundFault"/></wsdl:message>
+  <wsdl:message name="ValidationFault"><wsdl:part name="fault" element="tns:validationFault"/></wsdl:message>
+  <wsdl:message name="DuplicateEmployeeFault"><wsdl:part name="fault" element="tns:duplicateEmployeeFault"/></wsdl:message>
+  <wsdl:message name="DataAccessFault"><wsdl:part name="fault" element="tns:dataAccessFault"/></wsdl:message>
+
+  <wsdl:portType name="EmployeePortType">
+    <wsdl:operation name="getEmployeeDetails">
+      <wsdl:documentation>Retourne la fiche d'un employé à partir de son matricule.</wsdl:documentation>
+      <wsdl:input message="tns:getEmployeeDetailsRequest"/>
+      <wsdl:output message="tns:getEmployeeDetailsResponse"/>
+      <wsdl:fault name="EmployeeNotFoundFault" message="tns:EmployeeNotFoundFault"/>
+      <wsdl:fault name="ValidationFault" message="tns:ValidationFault"/>
+      <wsdl:fault name="DataAccessFault" message="tns:DataAccessFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="createEmployee">
+      <wsdl:documentation>Crée un employé dans la base de référence et l'inscrit dans l'outbox pour le retour vers MySQL.</wsdl:documentation>
+      <wsdl:input message="tns:createEmployeeRequest"/>
+      <wsdl:output message="tns:createEmployeeResponse"/>
+      <wsdl:fault name="ValidationFault" message="tns:ValidationFault"/>
+      <wsdl:fault name="DuplicateEmployeeFault" message="tns:DuplicateEmployeeFault"/>
+      <wsdl:fault name="DataAccessFault" message="tns:DataAccessFault"/>
+    </wsdl:operation>
+    <wsdl:operation name="updateEmployee">
+      <wsdl:documentation>Modifie partiellement un employé existant (seuls les champs fournis changent).</wsdl:documentation>
+      <wsdl:input message="tns:updateEmployeeRequest"/>
+      <wsdl:output message="tns:updateEmployeeResponse"/>
+      <wsdl:fault name="EmployeeNotFoundFault" message="tns:EmployeeNotFoundFault"/>
+      <wsdl:fault name="ValidationFault" message="tns:ValidationFault"/>
+      <wsdl:fault name="DuplicateEmployeeFault" message="tns:DuplicateEmployeeFault"/>
+      <wsdl:fault name="DataAccessFault" message="tns:DataAccessFault"/>
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="EmployeeSoapBinding" type="tns:EmployeePortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getEmployeeDetails">
+      <soap:operation soapAction="http://ws.employes.ibam.bf/v1/getEmployeeDetails"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+      <wsdl:fault name="EmployeeNotFoundFault"><soap:fault name="EmployeeNotFoundFault" use="literal"/></wsdl:fault>
+      <wsdl:fault name="ValidationFault"><soap:fault name="ValidationFault" use="literal"/></wsdl:fault>
+      <wsdl:fault name="DataAccessFault"><soap:fault name="DataAccessFault" use="literal"/></wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="createEmployee">
+      <soap:operation soapAction="http://ws.employes.ibam.bf/v1/createEmployee"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+      <wsdl:fault name="ValidationFault"><soap:fault name="ValidationFault" use="literal"/></wsdl:fault>
+      <wsdl:fault name="DuplicateEmployeeFault"><soap:fault name="DuplicateEmployeeFault" use="literal"/></wsdl:fault>
+      <wsdl:fault name="DataAccessFault"><soap:fault name="DataAccessFault" use="literal"/></wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="updateEmployee">
+      <soap:operation soapAction="http://ws.employes.ibam.bf/v1/updateEmployee"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+      <wsdl:fault name="EmployeeNotFoundFault"><soap:fault name="EmployeeNotFoundFault" use="literal"/></wsdl:fault>
+      <wsdl:fault name="ValidationFault"><soap:fault name="ValidationFault" use="literal"/></wsdl:fault>
+      <wsdl:fault name="DuplicateEmployeeFault"><soap:fault name="DuplicateEmployeeFault" use="literal"/></wsdl:fault>
+      <wsdl:fault name="DataAccessFault"><soap:fault name="DataAccessFault" use="literal"/></wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+
+  <wsdl:service name="EmployeeService">
+    <wsdl:port name="EmployeePort" binding="tns:EmployeeSoapBinding">
+      <soap:address location="http://localhost:8080/services/EmployeeService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

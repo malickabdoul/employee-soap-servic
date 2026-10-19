@@ -1,0 +1,7 @@
+service/target/
+tests/e2e/derniere-execution.log
+tests/e2e/pentaho-*.log
+tests/soapui/reports/
+*.iml
+.idea/
+.vscode/
