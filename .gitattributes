@@ -1,0 +1,3 @@
+# Fins de ligne Unix pour les scripts et les fichiers montés dans les conteneurs Linux
+*.sh       text eol=lf
+netdata/** text eol=lf

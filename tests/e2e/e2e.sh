@@ -16,8 +16,19 @@ ko()   { echo "  [ECHEC] $1" | tee -a "$LOG"; FAIL=$((FAIL+1)); }
 step() { echo; echo "== $1" | tee -a "$LOG"; }
 check(){ if grep -q -- "$2" <<<"$3"; then ok "$1"; else ko "$1 (attendu : $2)"; echo "$3" >> "$LOG"; fi; }
 
-mysql_q() { docker compose exec -T mysql mysql -uroot -proot_pwd --default-character-set=utf8mb4 rh_source -N -e "$1" 2>/dev/null; }
-pg_q()    { docker compose exec -T postgres psql -U postgres -d employes_ref -tA -c "$1"; }
+if [[ "${E2E_MODE:-docker}" == local ]]; then
+  # Installation locale sans Docker (voir docs/installation-windows.md) : clients mysql/psql et pg_ctl
+  # pris dans le PATH ou via MYSQL_CLI, PSQL, PG_CTL ; PG_DATA = répertoire de données PostgreSQL.
+  mysql_q() { "${MYSQL_CLI:-mysql}" -h "${MYSQL_HOST:-127.0.0.1}" -P "${MYSQL_PORT:-3306}" -uroot -proot_pwd --default-character-set=utf8mb4 rh_source -N -e "$1" 2>/dev/null | tr -d '\r'; }
+  pg_q()    { PGPASSWORD=postgres_pwd "${PSQL:-psql}" -h "${PG_HOST:-localhost}" -p "${PG_PORT:-5432}" -U postgres -d employes_ref -tA -c "$1" | tr -d '\r'; }
+  pg_stop()  { "${PG_CTL:-pg_ctl}" -D "$PG_DATA" -m fast -w stop; }
+  pg_start() { "${PG_CTL:-pg_ctl}" -D "$PG_DATA" -l "$PG_DATA/../pg.log" -w start; }
+else
+  mysql_q() { docker compose exec -T mysql mysql -uroot -proot_pwd --default-character-set=utf8mb4 rh_source -N -e "$1" 2>/dev/null; }
+  pg_q()    { docker compose exec -T postgres psql -U postgres -d employes_ref -tA -c "$1"; }
+  pg_stop()  { docker compose stop postgres; }
+  pg_start() { docker compose start postgres; }
+fi
 soap() {  # soap <operation> <corps XML>
   curl -s -m 10 -H 'Content-Type: text/xml;charset=UTF-8' -H "SOAPAction: \"$NS/$1\"" --data-binary @- "$URL" <<XML
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="$NS">
@@ -69,10 +80,10 @@ check "Employé inexistant -> EMPLOYEE_NOT_FOUND" "EMPLOYEE_NOT_FOUND" \
       "$(soap getEmployeeDetails '<emp:getEmployeeDetailsRequest><emp:matricule>EMP-9999</emp:matricule></emp:getEmployeeDetailsRequest>')"
 check "Création invalide -> VALIDATION_ERROR" "VALIDATION_ERROR" "$(soap createEmployee "$(sed -n '/<emp:createEmployeeRequest>/,/<\/emp:createEmployeeRequest>/p' tests/requests/create-invalide.xml)")"
 check "Création en doublon -> DUPLICATE_EMPLOYEE" "DUPLICATE_EMPLOYEE" "$(soap createEmployee "$(sed -n '/<emp:createEmployeeRequest>/,/<\/emp:createEmployeeRequest>/p' tests/requests/create-doublon.xml)")"
-docker compose stop postgres >/dev/null 2>&1
+pg_stop >/dev/null 2>&1
 check "Base arrêtée -> DATA_ACCESS_ERROR" "DATA_ACCESS_ERROR" \
       "$(soap getEmployeeDetails '<emp:getEmployeeDetailsRequest><emp:matricule>EMP-0001</emp:matricule></emp:getEmployeeDetailsRequest>')"
-docker compose start postgres >/dev/null 2>&1
+pg_start >/dev/null 2>&1
 R=""
 for i in $(seq 1 30); do  # le pool de connexions se reconnecte tout seul
   R=$(soap getEmployeeDetails '<emp:getEmployeeDetailsRequest><emp:matricule>EMP-0001</emp:matricule></emp:getEmployeeDetailsRequest>')

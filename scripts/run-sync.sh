@@ -15,7 +15,20 @@ case "${1:-aller}" in
 esac
 TZ_OPT="-Duser.timezone=Africa/Ouagadougou"   # même fuseau que les bases (voir docs/strategie-synchronisation.md)
 
-if [[ -n "${PDI_HOME:-}" ]]; then
+if [[ -n "${PDI_HOME:-}" && "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+  # Windows (Git Bash) : kitchen.sh refuse cet OS et Kitchen.bat gère mal les chemins avec espaces,
+  # on lance donc directement le lanceur Java de PDI, comme le fait Kitchen.bat.
+  JAVA_BIN="${PENTAHO_JAVA_HOME:+$PENTAHO_JAVA_HOME/bin/}java"
+  JOB_FILE="$(cygpath -w "$PWD/pentaho/$JOB")"
+  cd "$PDI_HOME"
+  "$JAVA_BIN" --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED \
+    --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED -Xms256m -Xmx1024m $TZ_OPT \
+    -Dfile.encoding=UTF-8 -Djava.locale.providers=COMPAT,SPI -jar launcher/launcher.jar \
+    -main org.pentaho.di.kitchen.Kitchen -initialDir "$(cygpath -w "$PDI_HOME")" \
+    -file="$JOB_FILE" -level="${PDI_LOG_LEVEL:-Basic}" \
+    -param:MYSQL_HOST="${MYSQL_HOST:-localhost}" -param:MYSQL_PORT="${MYSQL_PORT:-3306}" \
+    -param:PG_HOST="${PG_HOST:-localhost}" -param:PG_PORT="${PG_PORT:-5432}"
+elif [[ -n "${PDI_HOME:-}" ]]; then
   export PENTAHO_DI_JAVA_OPTIONS="-Xms256m -Xmx1024m $TZ_OPT"
   "$PDI_HOME/kitchen.sh" -file="$PWD/pentaho/$JOB" -level="${PDI_LOG_LEVEL:-Basic}" \
     -param:MYSQL_HOST="${MYSQL_HOST:-localhost}" -param:MYSQL_PORT="${MYSQL_PORT:-3306}" \
