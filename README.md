@@ -43,7 +43,7 @@ Détails : [docs/architecture.md](docs/architecture.md).
 ## Installation sur une machine neuve
 
 ```bash
-git clone <url-du-depot> employee-soap-service
+git clone https://github.com/malickabdoul/employee-soap-servic.git employee-soap-service
 cd employee-soap-service
 
 # 1. Démarrer les bases, le service et Netdata (crée les schémas et les données fictives)
