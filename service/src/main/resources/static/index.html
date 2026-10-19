@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Démo service SOAP employés</title>
+<style>
+  :root {
+    --bg: #f5f7fb; --card: #ffffff; --text: #1c2433; --muted: #5d6b82; --line: #dfe5ef;
+    --accent: #1f5fd1; --accent-soft: #e8f0fd; --ok: #1d8a4e; --ok-soft: #e6f5ec;
+    --err: #c0392b; --err-soft: #fdecea; --warn: #b7791f; --code: #f0f3f8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10141c; --card: #181e2a; --text: #e6ebf3; --muted: #9aa7bd; --line: #2a3446;
+      --accent: #6b9cff; --accent-soft: #1d2a45; --ok: #4cc283; --ok-soft: #15301f;
+      --err: #ff7b6b; --err-soft: #3a1c1a; --warn: #e2b04a; --code: #121722;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px 48px; }
+  header h1 { margin: 0 0 4px; font-size: 26px; }
+  header p { margin: 0; color: var(--muted); }
+  .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .links a { color: var(--accent); background: var(--accent-soft); padding: 5px 12px;
+             border-radius: 999px; text-decoration: none; font-size: 14px; }
+  .links a:hover { text-decoration: underline; }
+
+  .chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; margin: 22px 0; }
+  .step { flex: 1 1 140px; background: var(--card); border: 1px solid var(--line);
+          border-radius: 10px; padding: 10px 12px; }
+  .step b { display: block; font-size: 14px; }
+  .step span { color: var(--muted); font-size: 13px; }
+  .arrow { align-self: center; color: var(--muted); font-size: 18px; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+         background: var(--muted); margin-right: 6px; vertical-align: 1px; }
+  .dot.up { background: var(--ok); } .dot.down { background: var(--err); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .card h2 { margin: 0 0 2px; font-size: 18px; }
+  .card .op { font-family: ui-monospace, Consolas, monospace; font-size: 13px; color: var(--accent); }
+  .card p.help { color: var(--muted); font-size: 13px; margin: 6px 0 12px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 8px 0 3px; }
+  input, select { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px;
+                  background: var(--bg); color: var(--text); font: inherit; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chips button { padding: 2px 9px; font-size: 12px; border-radius: 999px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  button { cursor: pointer; border: 1px solid var(--line); background: var(--bg); color: var(--text);
+           padding: 8px 13px; border-radius: 8px; font: inherit; font-size: 14px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.bad { border-color: var(--err); color: var(--err); }
+  button:hover { filter: brightness(1.07); }
+  button:disabled { opacity: .55; cursor: wait; }
+
+  #result { margin-top: 20px; }
+  .res { border-radius: 12px; padding: 16px 18px; border: 1px solid var(--line); background: var(--card); }
+  .res.ok { border-color: var(--ok); background: var(--ok-soft); }
+  .res.err { border-color: var(--err); background: var(--err-soft); }
+  .res h3 { margin: 0 0 6px; font-size: 17px; }
+  .res .meta { color: var(--muted); font-size: 13px; }
+  table { border-collapse: collapse; margin-top: 10px; width: 100%; max-width: 640px; }
+  td { padding: 4px 10px 4px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { color: var(--muted); width: 38%; }
+  .code { font-family: ui-monospace, Consolas, monospace; font-weight: 600; }
+  ul.errs { margin: 8px 0 0; padding-left: 20px; }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: var(--accent); font-size: 14px; }
+  pre { background: var(--code); border: 1px solid var(--line); border-radius: 8px; padding: 10px;
+        overflow: auto; font-size: 12px; max-height: 320px; white-space: pre-wrap; word-break: break-all; }
+  .xml { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+  footer { margin-top: 32px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Service SOAP de gestion des employés</h1>
+    <p>Projet composants et services web 2026 · Thème 4 · SI Groupe 6 · Java, Apache CXF, Pentaho, Netdata</p>
+    <div class="links">
+      <a href="/services/EmployeeService?wsdl" target="_blank">Contrat WSDL</a>
+      <a href="/services" target="_blank">Liste des services CXF</a>
+      <a href="/actuator/health" target="_blank">Santé du service</a>
+      <a href="http://localhost:19999" target="_blank">Supervision Netdata</a>
+    </div>
+  </header>
+
+  <div class="chain" aria-label="Chaîne du projet">
+    <div class="step"><b><span class="dot" id="st-mysql"></span>MySQL</b><span>base source (ancien fichier RH)</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>Pentaho</b><span>copie, nettoie, rejette les fiches invalides</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b><span class="dot" id="st-pg"></span>PostgreSQL</b><span>base de référence</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b><span class="dot" id="st-ws"></span>Service SOAP</b><span>le « guichet » utilisé par les autres logiciels</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b><span class="dot" id="st-nd"></span>Netdata</b><span>surveille et alerte</span></div>
+  </div>
+
+  <div class="grid">
+    <!-- Consultation -->
+    <section class="card">
+      <h2>Consulter un employé</h2>
+      <div class="op">getEmployeeDetails</div>
+      <p class="help">Demande la fiche d'un employé à partir de son matricule.</p>
+      <label for="g-mat">Matricule</label>
+      <input id="g-mat" value="EMP-0001">
+      <div class="chips">
+        <button data-mat="EMP-0001">EMP-0001</button><button data-mat="EMP-0002">EMP-0002</button>
+        <button data-mat="EMP-0008">EMP-0008</button><button data-mat="EMP-0015">EMP-0015</button>
+      </div>
+      <div class="actions">
+        <button class="primary" id="g-go">Consulter</button>
+        <button class="bad" id="g-bad">Cas d'erreur : employé inexistant</button>
+      </div>
+    </section>
+
+    <!-- Création -->
+    <section class="card">
+      <h2>Créer un employé</h2>
+      <div class="op">createEmployee</div>
+      <p class="help">Ajoute un employé. Le service vérifie chaque champ avant d'écrire en base.</p>
+      <div class="row">
+        <div><label for="c-mat">Matricule</label><input id="c-mat"></div>
+        <div><label for="c-dep">Département</label>
+          <select id="c-dep"><option value="INFO">Informatique</option><option value="RH">Ressources humaines</option>
+            <option value="FIN" selected>Finance</option><option value="COM">Commercial</option>
+            <option value="LOG">Logistique</option><option value="DIR">Direction</option></select></div>
+        <div><label for="c-nom">Nom</label><input id="c-nom" value="Sankara"></div>
+        <div><label for="c-pre">Prénom</label><input id="c-pre" value="Thomas"></div>
+        <div><label for="c-mail">Email</label><input id="c-mail"></div>
+        <div><label for="c-tel">Téléphone</label><input id="c-tel" value="+22670000100"></div>
+        <div><label for="c-nais">Date de naissance</label><input id="c-nais" type="date" value="1992-05-10"></div>
+        <div><label for="c-emb">Date d'embauche</label><input id="c-emb" type="date" value="2024-01-15"></div>
+        <div><label for="c-poste">Poste</label><input id="c-poste" value="Analyste financier"></div>
+        <div><label for="c-sal">Salaire (FCFA)</label><input id="c-sal" value="600000.00"></div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="c-go">Créer</button>
+        <button class="bad" id="c-bad">Cas d'erreur : données invalides</button>
+        <button class="bad" id="c-dup">Cas d'erreur : doublon</button>
+      </div>
+    </section>
+
+    <!-- Modification -->
+    <section class="card">
+      <h2>Modifier un employé</h2>
+      <div class="op">updateEmployee</div>
+      <p class="help">Change seulement les champs remplis. La modification est aussi notée pour être renvoyée vers MySQL par Pentaho.</p>
+      <label for="u-mat">Matricule</label><input id="u-mat" value="EMP-0002">
+      <div class="row">
+        <div><label for="u-poste">Nouveau poste</label><input id="u-poste" value="Responsable infrastructure"></div>
+        <div><label for="u-sal">Nouveau salaire</label><input id="u-sal" value="850000.00"></div>
+      </div>
+      <label for="u-stat">Nouveau statut</label>
+      <select id="u-stat"><option value="">(inchangé)</option><option>ACTIF</option><option>SUSPENDU</option><option>SORTI</option></select>
+      <div class="actions">
+        <button class="primary" id="u-go">Modifier</button>
+        <button class="bad" id="u-bad">Cas d'erreur : employé inexistant</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="result" aria-live="polite"></div>
+
+  <footer>
+    NANA Abdoul Faycal · OUEDRAOGO Y. Ibrahim · KABORE Wend-Barka Boukary · TINDANO Fernand Amed · KOMPAORE Abdoul Malick
+  </footer>
+</div>
+
+<script>
+const NS = "http://ws.employes.ibam.bf/v1";
+const ENDPOINT = "/services/EmployeeService";
+const $ = id => document.getElementById(id);
+
+const LABELS = {
+  matricule: "Matricule", nom: "Nom", prenom: "Prénom", email: "Email", telephone: "Téléphone",
+  dateNaissance: "Date de naissance", dateEmbauche: "Date d'embauche", departement: "Département",
+  poste: "Poste", salaire: "Salaire (FCFA)", statut: "Statut", source: "Dernière modification par",
+  updatedAt: "Modifié le"
+};
+const FAULTS = {
+  EMPLOYEE_NOT_FOUND: "Employé introuvable",
+  VALIDATION_ERROR: "Données refusées par les règles de validation",
+  DUPLICATE_EMPLOYEE: "Doublon : matricule ou email déjà utilisé",
+  DATA_ACCESS_ERROR: "Base de données indisponible"
+};
+
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function tag(name, value) { return value === "" || value == null ? "" : `<emp:${name}>${esc(value)}</emp:${name}>`; }
+function envelope(body) {
+  return `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:emp="${NS}">\n` +
+         `  <soapenv:Header/>\n  <soapenv:Body>\n    ${body}\n  </soapenv:Body>\n</soapenv:Envelope>`;
+}
+function pretty(xml) {
+  let out = "", depth = 0;
+  xml.replace(/>\s*</g, ">\n<").split("\n").forEach(line => {
+    if (/^<\//.test(line)) depth = Math.max(depth - 1, 0);
+    out += "  ".repeat(depth) + line + "\n";
+    if (/^<[^!?\/][^>]*[^\/]>$/.test(line) && !/<\/[^>]+>$/.test(line)) depth++;
+  });
+  return out.trim();
+}
+function randomMatricule() { return "EMP-" + (5000 + Math.floor(Math.random() * 5000)); }
+function freshCreateForm() {
+  const m = randomMatricule();
+  $("c-mat").value = m;
+  $("c-mail").value = "thomas.sankara." + m.slice(4) + "@atser.bf";
+}
+
+async function call(operation, body, title) {
+  const req = envelope(body);
+  const buttons = document.querySelectorAll("button");
+  buttons.forEach(b => b.disabled = true);
+  const t0 = performance.now();
+  let status, text;
+  try {
+    const r = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/xml;charset=UTF-8", "SOAPAction": `"${NS}/${operation}"` },
+      body: req
+    });
+    status = r.status; text = await r.text();
+  } catch (e) {
+    status = 0; text = String(e);
+  } finally {
+    buttons.forEach(b => b.disabled = false);
+  }
+  render(operation, title, req, status, text, Math.round(performance.now() - t0));
+  refreshStatus();
+}
+
+function render(operation, title, req, status, text, ms) {
+  const doc = new DOMParser().parseFromString(text, "text/xml");
+  const fault = doc.getElementsByTagNameNS("*", "Fault")[0];
+  const emp = doc.getElementsByTagNameNS(NS, "employee")[0];
+  const meta = `<div class="meta">${esc(title)} · opération <span class="code">${operation}</span> · HTTP ${status} · ${ms} ms</div>`;
+  let html;
+  if (emp && !fault) {
+    let rows = "";
+    for (const el of emp.children) {
+      let v = el.textContent;
+      if (el.localName === "salaire") v = Number(v).toLocaleString("fr-FR") + " FCFA";
+      if (el.localName === "updatedAt") v = new Date(v).toLocaleString("fr-FR");
+      rows += `<tr><td>${esc(LABELS[el.localName] || el.localName)}</td><td>${esc(v)}</td></tr>`;
+    }
+    const verb = operation === "createEmployee" ? "créé" : operation === "updateEmployee" ? "modifié" : "trouvé";
+    html = `<div class="res ok"><h3>✔ Employé ${verb}</h3>${meta}<table>${rows}</table>`;
+  } else if (fault) {
+    const detail = fault.getElementsByTagNameNS(NS, "code")[0];
+    const code = detail ? detail.textContent : "";
+    const msg = (fault.getElementsByTagNameNS(NS, "message")[0] || fault.getElementsByTagName("faultstring")[0] || {}).textContent || "";
+    const fc = (fault.getElementsByTagName("faultcode")[0] || {}).textContent || "";
+    let errs = "";
+    for (const fe of fault.getElementsByTagNameNS(NS, "fieldErrors")) {
+      const f = fe.getElementsByTagNameNS(NS, "field")[0], m = fe.getElementsByTagNameNS(NS, "message")[0];
+      errs += `<li><b>${esc(LABELS[f && f.textContent] || (f && f.textContent))}</b> : ${esc(m ? m.textContent : "")}</li>`;
+    }
+    html = `<div class="res err"><h3>✖ Erreur SOAP : ${esc(FAULTS[code] || code || "erreur")}</h3>${meta}
+      <table><tr><td>Code d'erreur</td><td class="code">${esc(code)}</td></tr>
+      <tr><td>Message du service</td><td>${esc(msg)}</td></tr>
+      <tr><td>Type de faute SOAP</td><td class="code">${esc(fc)}${fc.endsWith("Client") ? " (la requête est en cause)" : fc.endsWith("Server") ? " (problème côté serveur)" : ""}</td></tr></table>
+      ${errs ? `<ul class="errs">${errs}</ul>` : ""}`;
+  } else {
+    html = `<div class="res err"><h3>✖ Le service ne répond pas</h3>${meta}<p>${esc(text.slice(0, 300))}</p>`;
+  }
+  html += `<details><summary>Voir les messages SOAP échangés (XML)</summary><div class="xml">
+      <div><b>Requête envoyée</b><pre>${esc(req)}</pre></div>
+      <div><b>Réponse reçue</b><pre>${esc(pretty(text))}</pre></div></div></details></div>`;
+  $("result").innerHTML = html;
+  $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// --- Consultation
+function get(mat, title) {
+  call("getEmployeeDetails", `<emp:getEmployeeDetailsRequest>${tag("matricule", mat)}</emp:getEmployeeDetailsRequest>`, title);
+}
+$("g-go").onclick = () => get($("g-mat").value.trim(), "Consultation");
+$("g-bad").onclick = () => { $("g-mat").value = "EMP-9999"; get("EMP-9999", "Cas d'erreur : employé inexistant"); };
+document.querySelectorAll("[data-mat]").forEach(b => b.onclick = () => { $("g-mat").value = b.dataset.mat; get(b.dataset.mat, "Consultation"); });
+
+// --- Création
+function createBody(f) {
+  return `<emp:createEmployeeRequest><emp:employee>${tag("matricule", f.mat)}${tag("nom", f.nom)}${tag("prenom", f.pre)}` +
+    `${tag("email", f.mail)}${tag("telephone", f.tel)}${tag("dateNaissance", f.nais)}${tag("dateEmbauche", f.emb)}` +
+    `${tag("departement", f.dep)}${tag("poste", f.poste)}${tag("salaire", f.sal)}</emp:employee></emp:createEmployeeRequest>`;
+}
+function readCreate() {
+  return { mat: $("c-mat").value.trim(), nom: $("c-nom").value.trim(), pre: $("c-pre").value.trim(),
+           mail: $("c-mail").value.trim(), tel: $("c-tel").value.trim(), nais: $("c-nais").value,
+           emb: $("c-emb").value, dep: $("c-dep").value, poste: $("c-poste").value.trim(), sal: $("c-sal").value.trim() };
+}
+$("c-go").onclick = async () => { await call("createEmployee", createBody(readCreate()), "Création"); freshCreateForm(); };
+$("c-bad").onclick = () => call("createEmployee", createBody({
+  mat: "E-12", nom: "Test", pre: "Invalide", mail: "pas-un-email", tel: "12", nais: "2015-01-01",
+  emb: "2099-01-01", dep: "XYZ", poste: "Stagiaire", sal: "-5" }), "Cas d'erreur : données invalides");
+$("c-dup").onclick = () => call("createEmployee", createBody({ ...readCreate(), mail: "awa.ouedraogo@atser.bf" }),
+  "Cas d'erreur : email d'un employé existant (EMP-0001)");
+
+// --- Modification
+function updateBody(mat) {
+  return `<emp:updateEmployeeRequest>${tag("matricule", mat)}<emp:changes>${tag("poste", $("u-poste").value.trim())}` +
+    `${tag("salaire", $("u-sal").value.trim())}${tag("statut", $("u-stat").value)}</emp:changes></emp:updateEmployeeRequest>`;
+}
+$("u-go").onclick = () => call("updateEmployee", updateBody($("u-mat").value.trim()), "Modification");
+$("u-bad").onclick = () => call("updateEmployee", updateBody("EMP-9999"), "Cas d'erreur : employé inexistant");
+
+// --- État de la chaîne (santé du service et de la base, Netdata)
+async function refreshStatus() {
+  const set = (id, up) => { $(id).className = "dot " + (up ? "up" : "down"); };
+  try {
+    const h = await (await fetch("/actuator/health", { cache: "no-store" })).json();
+    set("st-ws", true); set("st-pg", h.components && h.components.db && h.components.db.status === "UP");
+  } catch (e) { set("st-ws", false); set("st-pg", false); }
+  try {
+    const r = await fetch("http://localhost:19999/api/v1/charts", { cache: "no-store" });
+    const txt = await r.text();
+    set("st-nd", r.ok); set("st-mysql", txt.includes("mysql_rh_source"));
+  } catch (e) { $("st-nd").className = "dot"; $("st-mysql").className = "dot"; }
+}
+
+freshCreateForm();
+refreshStatus();
+setInterval(refreshStatus, 15000);
+</script>
+</body>
+</html>
