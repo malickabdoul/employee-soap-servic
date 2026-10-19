@@ -57,6 +57,12 @@ class EmployeeEndpointTest {
     }
 
     @Test
+    void pageDeDemonstrationServieALaRacine() {
+        String page = new RestTemplate().getForObject("http://localhost:" + port + "/", String.class);
+        assertThat(page).contains("Service SOAP de gestion des employés", "/services/EmployeeService");
+    }
+
+    @Test
     void getEmployeeDetailsRetourneLaFiche() throws Exception {
         Employee e = client.getEmployeeDetails(get("EMP-0001")).getEmployee();
         assertThat(e.getNom()).isEqualTo("OUEDRAOGO");

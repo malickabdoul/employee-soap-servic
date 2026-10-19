@@ -62,6 +62,7 @@ curl http://localhost:8080/services/EmployeeService?wsdl
 
 | URL | Contenu |
 |---|---|
+| http://localhost:8080/ | Page de démonstration : appelle les 3 opérations (cas normaux et erreurs) et affiche les réponses |
 | http://localhost:8080/services | Liste des services CXF |
 | http://localhost:8080/services/EmployeeService?wsdl | Contrat WSDL |
 | http://localhost:8080/actuator/health | État du service et de la base |
