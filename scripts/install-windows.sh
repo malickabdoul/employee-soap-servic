@@ -4,6 +4,7 @@
 #   ./scripts/install-windows.sh           installe ce qui manque, initialise les bases, démarre tout
 #   ./scripts/install-windows.sh start     redémarre MySQL, PostgreSQL et le service (ex. après un redémarrage du PC)
 #   ./scripts/install-windows.sh stop      arrête MySQL, PostgreSQL et le service
+#   ./scripts/install-windows.sh reset     recrée les bases avec les données de départ (avant une démonstration)
 #   ./scripts/install-windows.sh status    état des composants et adresses utiles
 #
 # Variables facultatives : TOOLS (défaut ~/tools, chemin SANS espace), MYSQL_PORT (3306), PG_PORT (5433),
@@ -258,10 +259,13 @@ EOF
 stop_all() {
   locate
   say "Arrêt"
-  local pid; pid="$(netstat -ano | grep LISTENING | grep -E ":$SERVICE_PORT " | awk '{print $NF}' | head -1)"
+  local pid; pid="$(netstat -ano | grep LISTENING | grep -E ":$SERVICE_PORT " | awk '{print $NF}' | head -1 || true)"
   [[ -n "$pid" ]] && taskkill //PID "$pid" //F > /dev/null && info "service arrêté"
   listening "$PG_PORT" && "$PG_BIN/pg_ctl.exe" -D "$(win "$DATA/pg")" -m fast -w stop > /dev/null && info "PostgreSQL arrêté"
   listening "$MYSQL_PORT" && "$M/mysqladmin.exe" -h127.0.0.1 -P"$MYSQL_PORT" -uroot -proot_pwd shutdown 2>/dev/null && info "MySQL arrêté"
+  for _ in $(seq 1 60); do   # l'arrêt de MySQL est asynchrone : attendre que mysqld libère ses fichiers
+    tasklist //FI "IMAGENAME eq mysqld.exe" 2>/dev/null | grep -qi mysqld || break; sleep 1
+  done
   return 0
 }
 
@@ -270,6 +274,8 @@ case "${1:-install}" in
            say "7/7 Terminé"; write_env; status ;;
   start)   locate; start_mysql; start_pg; start_service; write_env; status ;;
   stop)    stop_all ;;
+  reset)   stop_all; rm -rf "$DATA/mysql" "$DATA/pg"              # bases remises à leur état initial (23 employés)
+           start_mysql; start_pg; start_service; first_sync; write_env; status ;;
   status)  status ;;
-  *) echo "usage : $0 [install|start|stop|status]" >&2; exit 2 ;;
+  *) echo "usage : $0 [install|start|stop|reset|status]" >&2; exit 2 ;;
 esac
