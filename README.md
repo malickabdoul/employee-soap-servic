@@ -36,7 +36,7 @@ Détails : [docs/architecture.md](docs/architecture.md).
 |---|---|---|
 | Docker + Docker Compose | Docker 24+ | MySQL, PostgreSQL, service SOAP, Netdata |
 | Pentaho Data Integration CE | 9.x ou 10.x (Java 11/17) | Jobs de synchronisation, [installation à part](pentaho/INSTALLATION.md) |
-| Java + Maven | JDK 17+, Maven 3.9 | Seulement pour compiler/tester le service hors Docker |
+| Java + Maven | JDK 17 à 22, Maven 3.9 (CXF ne fonctionne pas avec JDK 23+ : `getSubject is not supported`) | Seulement pour compiler/tester le service hors Docker |
 | SoapUI | 5.7+ (ou Docker) | Tests SOAP |
 | bash, curl | – | Scripts (sous Windows : Git Bash ou WSL) |
 
@@ -91,7 +91,7 @@ Synchronisations :
 ## Tests
 
 ```bash
-cd service && mvn test && cd ..   # 15 tests JUnit (validation + appels SOAP réels sur base H2)
+cd service && mvn test && cd ..   # 25 tests JUnit (validation, règles métier, appels SOAP réels sur base H2)
 ./scripts/run-soapui.sh           # projet SoapUI : 4 cas, 12 requêtes, 54 assertions
 ./tests/e2e/e2e.sh                # chaîne complète MySQL -> Pentaho -> PG -> SOAP -> Pentaho -> MySQL + Netdata
 ```

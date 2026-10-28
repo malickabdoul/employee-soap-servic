@@ -2,13 +2,14 @@
 
 | Niveau | Commande | Résultat attendu | Résultat obtenu |
 |---|---|---|---|
-| Unitaires + intégration SOAP (JUnit) | `cd service && mvn test` | 15 tests, 0 échec | 15 / 15 |
+| Unitaires + intégration SOAP (JUnit) | `cd service && mvn test` | 25 tests, 0 échec | 25 / 25 |
 | SoapUI | `./scripts/run-soapui.sh` (ou ouvrir le projet dans SoapUI) | 4 cas, 12 requêtes, 54 assertions, 0 échec | 54 / 54 ([résumé](soapui/resultats/resume.txt)) |
 | Bout en bout | `./tests/e2e/e2e.sh` | 23 vérifications réussies | 23 / 23 ([journal](e2e/resultat-reference.log)) |
 
 ## JUnit (`service/src/test`)
 
-- `EmployeeValidatorTest` (6 tests) : employé valide, champs obligatoires, formats (matricule, email, téléphone, salaire, statut), âge minimum et date d'embauche, département inconnu, normalisation.
+- `EmployeeValidatorTest` (8 tests) : employé valide, champs obligatoires, formats (matricule, email, téléphone, salaire, statut), âge minimum et date d'embauche, cas limites (18 ans pile, embauche avant la naissance), longueurs maximales et précision du salaire, département inconnu, normalisation.
+- `EmployeeServiceTest` (7 tests) : règles métier du service sans base de données (dépôt simulé avec Mockito) : normalisation du matricule recherché, statut `ACTIF` par défaut, code de département remplacé par son libellé, doublons de matricule et d'email, aucune écriture ni ligne d'outbox si les données sont invalides, modification partielle qui conserve les autres champs.
 - `EmployeeEndpointTest` (9 tests) : démarre le service avec une base H2 et l'appelle via un vrai client SOAP généré depuis le WSDL : WSDL publié, consultation, employé inexistant, matricule mal formé, création + outbox, doublons de matricule et d'email, création invalide avec la liste des champs, modification partielle + outbox, modification d'un inexistant et email déjà pris.
 
 ## SoapUI (`tests/soapui/EmployeeService-soapui-project.xml`)

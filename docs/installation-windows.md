@@ -83,7 +83,7 @@ for f in db/postgres/01_schema.sql db/postgres/02_users.sql; do "$B/psql.exe" -h
 ## 3. Service SOAP
 
 ```bash
-cd service && mvn -B package && cd ..          # compile + 15 tests JUnit
+cd service && mvn -B package && cd ..          # compile + 25 tests JUnit
 DB_URL=jdbc:postgresql://localhost:5433/employes_ref DB_USER=app DB_PASSWORD=app_pwd \
   java -Duser.timezone=Africa/Ouagadougou -jar service/target/employee-soap-service.jar
 ```
