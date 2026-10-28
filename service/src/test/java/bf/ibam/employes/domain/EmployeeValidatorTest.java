@@ -59,6 +59,33 @@ class EmployeeValidatorTest {
     }
 
     @Test
+    void casLimitesDesDates() {
+        EmployeeDraft dixHuitAnsPile = new EmployeeDraft("EMP-0100", "Z", "A", "a@b.bf", null,
+                LocalDate.of(2008, 10, 19), LocalDate.of(2026, 10, 19), "Informatique", "Stagiaire",
+                BigDecimal.TEN, "ACTIF");
+        assertThat(validator.validate(dixHuitAnsPile, true)).isEmpty();
+
+        EmployeeDraft embaucheAvantNaissance = new EmployeeDraft("EMP-0100", "Z", "A", "a@b.bf", null,
+                LocalDate.of(1990, 1, 1), LocalDate.of(1989, 1, 1), "Informatique", "Analyste",
+                BigDecimal.TEN, "ACTIF");
+        assertThat(fields(embaucheAvantNaissance, true)).containsExactly("dateEmbauche");
+    }
+
+    @Test
+    void longueursEtPrecisionDuSalaire() {
+        String tropLong = "X".repeat(101);
+        EmployeeDraft d = new EmployeeDraft("EMP-0100", tropLong, "Alice", "alice.zongo@atser.bf", null,
+                LocalDate.of(1995, 1, 1), LocalDate.of(2020, 1, 1), "Informatique", tropLong,
+                new BigDecimal("1000.123"), "ACTIF");
+        assertThat(fields(d, true)).containsExactlyInAnyOrder("nom", "poste", "salaire");
+
+        EmployeeDraft salaireTropGrand = new EmployeeDraft("EMP-0100", "ZONGO", "Alice", "alice.zongo@atser.bf",
+                null, LocalDate.of(1995, 1, 1), LocalDate.of(2020, 1, 1), "Informatique", "Analyste",
+                new BigDecimal("12345678901.00"), "ACTIF");
+        assertThat(fields(salaireTropGrand, true)).containsExactly("salaire");
+    }
+
+    @Test
     void departementInconnu() {
         assertThat(fields(valid(), false)).containsExactly("departement");
     }
