@@ -2,6 +2,7 @@ package bf.ibam.employes.domain;
 
 import java.math.BigDecimal;
 import java.time.Clock;
+import java.util.Locale;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +84,7 @@ public class EmployeeValidator {
                 upper(e.matricule()),
                 upper(e.nom()),
                 trim(e.prenom()),
-                e.email() == null ? null : e.email().trim().toLowerCase(),
+                e.email() == null ? null : e.email().trim().toLowerCase(Locale.ROOT),
                 trim(e.telephone()),
                 e.dateNaissance(),
                 e.dateEmbauche(),
@@ -110,6 +111,6 @@ public class EmployeeValidator {
     }
 
     private static String upper(String s) {
-        return s == null ? null : s.trim().toUpperCase();
+        return s == null ? null : s.trim().toUpperCase(Locale.ROOT);
     }
 }
