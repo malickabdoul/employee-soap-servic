@@ -1,5 +1,6 @@
-package bf.ibam.employes;
+/** Service SOAP de gestion des employés (Spring Boot + Apache CXF, base de référence PostgreSQL). */
 
+    package bf.ibam.employes;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
