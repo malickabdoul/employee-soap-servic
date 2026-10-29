@@ -36,6 +36,26 @@ public record EmployeeDraft(
                 pick(changes.statut(), current.statut()));
     }
 
+    /** Copie du brouillon avec un autre statut. */
+    public EmployeeDraft withStatut(String nouveauStatut) {
+        return new EmployeeDraft(matricule, nom, prenom, email, telephone, dateNaissance, dateEmbauche,
+                departement, poste, salaire, nouveauStatut);
+    }
+
+    /** Copie du brouillon avec un autre département (par exemple le libellé officiel). */
+    public EmployeeDraft withDepartement(String nouveauDepartement) {
+        return new EmployeeDraft(matricule, nom, prenom, email, telephone, dateNaissance, dateEmbauche,
+                nouveauDepartement, poste, salaire, statut);
+    }
+
+    /** Sans données personnelles (email, téléphone, dates, salaire) : sûr à écrire dans un log. */
+    @Override
+    public String toString() {
+        return "EmployeeDraft[matricule=" + matricule + ", nom=" + nom + ", prenom=" + prenom
+                + ", departement=" + departement + ", poste=" + poste + ", statut=" + statut
+                + ", email/telephone/dates/salaire=***]";
+    }
+
     private static <T> T pick(T value, T fallback) {
         return value != null ? value : fallback;
     }
